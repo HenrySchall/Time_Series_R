@@ -1,0 +1,810 @@
+---
+title: <center> <h2> <b> Modelo Vetorial Autorregressivo (VAR) </b> </h2> </center> 
+author: <center> Frank Magalhães de Pinho - IBMEC/MG </center>
+graphics: yes
+linkcolor: blue
+output: 
+  html_notebook:
+    theme: cerulean
+    fig_caption: yes
+references:
+- id: tsay2014introduction
+  title: An introduction to analysis of financial data with R
+  author:
+  - family: Tsay
+    given: Ruey S
+  publisher: John Wiley \& Sons
+  type: book
+  issued:
+    year: 2014
+- id: tsay2010analysis
+  title: Analysis of financial time series
+  author:
+  - family: Tsay
+    given: Ruey S
+  publisher: John Wiley \& Sons
+  type: book
+  issued:
+    year: 2010
+- id: tsay2013multivariate
+  title: Multivariate time series analysis with R and financial application
+  author:
+  - family: Tsay
+    given: Ruey S
+  publisher: John Wiley \& Sons
+  type: book
+  issued:
+    year: 2013
+- id: tiao1981modeling
+  title: Modeling multiple time series with applications
+  author:
+  - family: Tiao
+    given: George C
+  - family: Box
+    given: George EP
+  publisher: Journal of the American Statistical Association
+  type: article-journal
+  volume: 76
+  page: 802-816
+  issued:
+    year: 1981
+- id: granger1969investigating
+  title: Investigating causal relations by econometric models and cross-spectral methods
+  author:
+  - family: Granger
+    given: Clive WJ
+  publisher: Econometrica Journal of the Econometric Society
+  type: article-journal
+  page: 424-438
+  issued:
+    year: 1969
+- id: sims1980macroeconomics
+  title: Macroeconomics and reality
+  author:
+  - family: Sims
+    given: Christopher A
+  publisher: Econometrica Journal of the Econometric Society
+  type: article-journal
+  page: 1-48
+  issued:
+    year: 1980
+- id: lutkepohl2005new
+  title: New introduction to multiple time series analysis
+  author:
+  - family: Lutkepohl
+    given: Helmut
+  publisher: Springer Science & Business Media
+  type: book
+  issued:
+    year: 2005
+nocite: | 
+  @tsay2014introduction, @tsay2010analysis, @tsay2013multivariate, @tiao1981modeling, @granger1969investigating, @sims1980macroeconomics, @lutkepohl2005new
+---
+
+Este material tem como objetivo introduzir os conceitos sobre o **Modelo Vetorial Autorregressivo (VAR)**. Neste sentido, vamos entender como tal modelo é especificado, suas condições, como estimá-lo e fazer previsões usando séries temporais multivariadas. 
+
+```{r, echo=FALSE}
+##########################
+####     PACOTES     #####
+##########################
+
+# Carregar no ambiente os pacotes necessários para replicar os códigos abaixo
+suppressMessages(require(quantmod))
+suppressMessages(require(Quandl))
+suppressMessages(require(forecast))
+suppressMessages(require(dplyr))
+suppressMessages(require(magrittr))
+suppressMessages(require(highcharter))
+suppressMessages(require(dygraphs))
+suppressMessages(require(ggplot2))
+suppressMessages(require(MTS))
+suppressMessages(require(vars))
+suppressMessages(require(urca))
+suppressMessages(require(seasonal))
+```
+
+##### **INTRODUÇÃO**
+
+Os modelos econômicos em geral são expressos por meio de diversas variáveis. Portanto, o uso de modelos univariados, como visto até o momento, é limitado para expressar modelos econômicos. Um exemplo básico são os modelos macroeconômicos de curto prazo onde PIB, consumo, investimento e gastos governamentais são determinados simultaneamente. 
+
+A partir do artigo de @sims1980macroeconomics, o uso do **Modelo Vetorial Autorregressivo (VAR)** se difundiu rapidamente e estão entre os instrumentos mais usados para investigar empiricamente a macroeconomia. 
+
+Os modelos **VAR** são sistemas de equações simultâneas que capturam a existência de relações de interdependência entre variáveis, e que permitem avaliar o impacto de choques estocásticos sobre determinada variável do sistema. O Banco Central, assim como a grande maioria de seus pares internacionais, utiliza modelos VAR como instrumento de análise e, principalmente, de previsão de inflação desde a implementação do regime de metas para a inflação, em junho de 1999.
+
+##### **VAR(1)**
+
+Uma série temporal multivariada $\boldsymbol{r_{t}}=(r_{1t},r_{2t},...,r_{kt})^{'}$ composta por $k$ componentes no tempo $t$ é um processo VAR de ordem $1$, ou $VAR(1)$, se segue o modelo:
+
+$$
+\boldsymbol{r_{t}} = \boldsymbol{\phi}_{0} + \boldsymbol{\Phi}\boldsymbol{r}_{t-1} + \boldsymbol{a_{t}}
+$$
+onde $\boldsymbol{\phi}_{0}$ é um vetor de dimensão $k$, $\boldsymbol{\Phi}$ é uma matriz $k \times k$ e $\boldsymbol{a_{t}}$ é um ruído branco formado por uma sequência de vetores aleatórios independentes e identicamente distribuídos com média $0$ e matriz de covariância $\boldsymbol{\sum_{a}}$. Na literatura, é frequentemente assumido que $\boldsymbol{a_{t}}$ segue uma distribuição Normal multivariada e que a matriz $\boldsymbol{\sum_{a}}$ é positiva definida. 
+
+Considere o caso bivariado (isto é, $k=2$, $\boldsymbol{r_{t}} = (r_{1t},r_{2t})^{'}$ e $\boldsymbol{a_{t}}=(a_{1t},a_{2t})^{'}$). O modelo $VAR(1)$ pode ser escrito como: 
+
+$$
+\left[\begin{matrix} {r}_{1t} \\ {r}_{2t} \end{matrix} \right] = \left[\begin{matrix} {\phi}_{10} \\ {\phi}_{20} \end{matrix} \right] + \left[ \begin{matrix}{\phi}_{11} \\ {\phi}_{21} \end{matrix}\begin{matrix} {\phi}_{12} \\ {\phi}_{22} \end{matrix} \right] \left[\begin{matrix} {r}_{1,t-1} \\ {r}_{2,t-1} \end{matrix} \right] + \left[\begin{matrix} {a}_{1t} \\ {a}_{2t} \end{matrix} \right] ,  \sum_{a} =  \left[ \begin{matrix}{\sigma}_{1}^{2} \\ {\sigma}_{21} \end{matrix}\begin{matrix} {\sigma}_{12} \\ {\sigma}_{2}^{2} \end{matrix} \right]
+$$
+
+onde $\phi_{ij}$ é o $(i,j)$-ésimo elemento de $\boldsymbol{\Phi}$, $\phi_{i0}$ é o i-ésimo elemento de $\boldsymbol{\phi}_{0}$, $var(a_{1t})=\sigma_1^{2}$, $var(a_{2t})=\sigma_2^{2}$ e $cov(a_{1t},a_{2t})=\sigma_{12}=\sigma_{21}$. 
+
+Equivalentemente, podemos escrever o modelo como:
+
+$$
+\begin{aligned}
+r_{1t} = \phi_{10} + \phi_{11}r_{1,t-1}+ \phi_{12}r_{2,t-1} + a_{1t} \\
+r_{2t} = \phi_{20} + \phi_{21}r_{1,t-1}+ \phi_{22}r_{2,t-1} + a_{2t} \\
+\end{aligned}
+$$
+
+Tal forma de especificar o modelo (tanto a matricial quanto a última) é chamada de **forma reduzida** em função da relação contemporânea entre $r_{1t}$ e $r_{2t}$ não ser mostrada explicitamente. Observe que trata-se de um modelo composto por duas equações (em função de termos duas variáveis) e cada equação é função de seu valor defasado e da primeira defasagem da outra variável. 
+
+Temos duas maneiras de avaliar as equações acima:
+
+1. Separadamente
+    * $\phi_{12}$ denota a dependência linear de $r_{1t}$ em relação a $r_{2,t-1}$ na presença de $r_{1,t-1}$. Portanto, $\phi_{12}$ é o efeito condicional de $r_{2,t-1}$ sobre $r_{1t}$ dado $r_{1,t-1}$.
+    * Se $\phi_{12}=0$, então $r_{1t}$ não depende de $r_{2,t-1}$ e o modelo mostra que $r_{1t}$ depende apenas de seus valores passados.
+    * Similarmente, se $\phi_{21}=0$, então a segunda equação mostra que $r_{2t}$ não depende de $r_{1,t-1}$ quando $r_{2,t-1}$ é dado
+2. Em conjunto
+    * Se $\phi_{12}=0$ e $\phi_{21} \neq 0$ o que mostra que $r_{1t}$ não depende de $r_{2t}$, mas $r_{2t}$ depende de $r_{1t}$. Consequentemente, temos uma relação unidirecional de $r_{1t}$ para $r_{2t}$. Na literatura de econometria, o modelo implica na existência de causalidade de Granger entre as duas séries com $r_{1t}$ causando $r_{2t}$, mas não sendo causada por $r_{2t}$.
+    * Se $\phi_{12}=\phi_{21}=0$, então $r_{1t}$ e $r_{2t}$ não são dinâmicamenta corelacionados. Neste caso, cada série segue um modelo AR(1) univariado. Dizemos que as duas séries são desacopladas.
+    * Se $\phi_{12} \neq 0$ e $\phi_{21} \neq 0$, então existe uma relação entre as duas séries, ou seja, elas se impactam. 
+    
+Além disso, um choque em $r_{1t}$ por meio de $a_{1t}$ tem efeito contemporâneo sobre $r_{1t}$. No período seguinte, este efeito se torna $r_{1,t-1}$ e afeta $r_{2t}$ que no período seguinte se torna $r_{2,t-1}$ e afeta $r_{1t}$ e assim sucessivamente. 
+
+Em um modelo estacionário este efeito do choque desaparece após alguns períodos. Como definimos anteriormente, uma série temporal multivariada $\boldsymbol{r_{t}}$ é fracamente estacionária se tem média constante ($\boldsymbol{\mu} = E(\boldsymbol{r_{t}})$) e matriz de covariância constante ($\boldsymbol{\Gamma}_{t,l}=Cov(\boldsymbol{r_{t}},\boldsymbol{r_{t-l}})=\boldsymbol{\Gamma}_{l}$), onde $l$ é uma defasagem qualquer. Assim, precisamos confirmar se o modelo **VAR(1)** respeita as hipóteses de estacionariedade fraca, como segue:
+
+* **MÉDIA CONSTANTE**
+    
+Fazendo uso das hipóteses $E(\boldsymbol{r}_{t})=E(\boldsymbol{r}_{t-1})=\boldsymbol{\mu}$ e que $E(\boldsymbol{a}_{t})=0$, temos:
+
+$$
+\begin{aligned}
+& E(\boldsymbol{r}_{t}) = \boldsymbol{\phi}_0 + \boldsymbol{\Phi}E(\boldsymbol{r}_{t-1}) \\
+& \boldsymbol{\mu} = \boldsymbol{\phi}_0 + \boldsymbol{\Phi}\boldsymbol{\mu} \\
+& \boldsymbol{\mu} = (\boldsymbol{I}-\boldsymbol{\Phi})^{-1}\boldsymbol{\phi}_0
+\end{aligned}
+$$
+
+onde $\boldsymbol{I}$ é uma matriz identidade $k \times k$ e a matriz $\boldsymbol{I}-\boldsymbol{\Phi}$ deve ser não singular (determinante diferente de zero) para que a inversa exista e, consequentemente, o vetor de médias.
+
+* **MATRIZ DE COVARIÂNCIA CONSTANTE**
+
+Reescrevendo a média do processo como $\boldsymbol{\phi_{0}} = (\boldsymbol{I}-\boldsymbol{\Phi})\boldsymbol{\mu}$, podemos escrever o modelo **VAR(1)** como:
+
+$$
+\begin{aligned}
+& \boldsymbol{r_{t}} = (\boldsymbol{I}-\boldsymbol{\Phi})\boldsymbol{\mu} + \boldsymbol{\Phi}\boldsymbol{r_{t-1}} + \boldsymbol{a_{t}} \\
+& \boldsymbol{r_{t}} = \boldsymbol{\mu} - \boldsymbol{\Phi}\boldsymbol{\mu} + \boldsymbol{\Phi}\boldsymbol{r_{t-1}} + \boldsymbol{a_{t}} \\
+& (\boldsymbol{r_{t}} - \boldsymbol{\mu}) = \boldsymbol{\Phi}(\boldsymbol{r_{t-1}}-\boldsymbol{\mu}) + \boldsymbol{a_{t}}
+\end{aligned}
+$$
+Fazendo $\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{r_{t}}-\boldsymbol{\mu}$, temos:
+
+$$
+\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-1}+\boldsymbol{a_{t}}
+$$
+Esta formulação é apenas uma forma diferente de escrever o modelo **VAR(1)** definido no início do texto. Substituindo $\widetilde{\boldsymbol{r}}_{t-1}$ recursivamente, produz:
+
+$$
+\begin{aligned}
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}(\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-2}+\boldsymbol{a_{t-1}})+\boldsymbol{a_{t}}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{2}\widetilde{\boldsymbol{r}}_{t-2}+\boldsymbol{\Phi}\boldsymbol{a_{t-1}}+\boldsymbol{a_{t}}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{2}(\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-3}+\boldsymbol{a_{t-2}})+\boldsymbol{\Phi}\boldsymbol{a_{t-1}}+\boldsymbol{a_{t}}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{3}\widetilde{\boldsymbol{r}}_{t-3}+\boldsymbol{\Phi}^{2}\boldsymbol{a_{t-2}}+\boldsymbol{\Phi}\boldsymbol{a_{t-1}}+\boldsymbol{a_{t}}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{a_{t}} + \boldsymbol{\Phi}\boldsymbol{a_{t-1}} + \boldsymbol{\Phi}^{2}\boldsymbol{a_{t-2}} + \boldsymbol{\Phi}^{3}\boldsymbol{a}_{t-3}+...
+\end{aligned}
+$$
+
+Esta formulação mostra algumas características de um processo **VAR(1)**. Elas são:
+
+1. Uma vez que $\boldsymbol{a_{t}}$ é serialmente não correlacionado (em função da hipótese de ser um ruído branco), segue que $Cov(\boldsymbol{a_{t}},\boldsymbol{r_{t-l}})=\boldsymbol{0}$. 
+2. Multiplicando a expressão por $\boldsymbol{a_{t}}^{'}$, calculando o valor esperado e usando a hipótese de $\boldsymbol{a_{t}}$ ser serialmente não correlacionado, obtemos $Cov(\boldsymbol{r}_{t},\boldsymbol{a}_{t})=\boldsymbol{\sum_{a}}$.
+3. Para um **VAR(1)**, $\widetilde{\boldsymbol{r}}_{t}$ e consequentemente $\boldsymbol{r_{t}}$ dependerá dos erros passados com matriz de coeficientes igual a $\boldsymbol{\Phi}^{j}$. Para esta dependência ser significativa $\boldsymbol{\Phi}^{j}$ deve convergir para zero na medida que $j \rightarrow  \infty$. Isto significa que os $k$ autovalores de $\boldsymbol{\Phi}$ devem ser menores que $1$, caso contrário $\boldsymbol{\Phi}^{j}$ vai explodir quando $j \rightarrow  \infty$.
+
+Usado as hipóteses acima e $Cov(\boldsymbol{a}_{t})=\boldsymbol{\sum_{a}}$ para qualquer $t$, temos que a covariância de $\boldsymbol{r_{t}}$ será:
+
+$$
+Cov(\boldsymbol{r_{t}})=Cov(\widetilde{\boldsymbol{r}}_{t})=\boldsymbol{\Gamma_{0}}=\boldsymbol{\sum_{a}}+\boldsymbol{\Phi}\boldsymbol{\sum_{a}}\boldsymbol{\Phi}^{'}+\boldsymbol{\Phi}^{2}\boldsymbol{\sum_{a}}(\boldsymbol{\Phi}^{2})^{'}+...= \sum_{i=0}^{\infty}{\boldsymbol{\Phi}^{i}\boldsymbol{\sum_{a}}(\boldsymbol{\Phi}^{i})^{'}}
+$$
+onde $\boldsymbol{\Phi}^{0}=\boldsymbol{I}$ é uma matriz identidade $k \times k$. Note que a covariância do processo não depende de qualquer $t$, sendo invariante do tempo. 
+
+* **MATRIZES DE COVARIÂNCIA E CORRELAÇÃO CRUZADA DEPENDENTE APENAS DE $l$**
+
+Sabemos que o modelo reescrito usando $\boldsymbol{\Phi_{0}} = (\boldsymbol{I}-\boldsymbol{\Phi})\boldsymbol{\mu}$ e $\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{r_{t}}-\boldsymbol{\mu}$ pode ser definido como:
+
+$$
+\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-1}+\boldsymbol{a_{t}}
+$$
+
+Multiplicando ambos os lados por $\widetilde{\boldsymbol{r}}_{t-l}^{'}=(\boldsymbol{r_{t-l}}-\boldsymbol{\mu})^{'}$, usando a hipótese de que $E(\boldsymbol{a_{t}},\widetilde{\boldsymbol{r}}^{'}_{t-l})=\boldsymbol{0}$ em função de $\boldsymbol{a_{t}}$ ser um ruído branco e calculando o valor esperado, teremos a matriz de covariância cruzada para qualquer defasagem $l>0$:
+
+$$
+\begin{aligned}
+& E(\widetilde{\boldsymbol{r}}_{t},\widetilde{\boldsymbol{r}}^{'}_{t-l})=\boldsymbol{\Phi}E(\widetilde{\boldsymbol{r}}_{t-1},\widetilde{\boldsymbol{r}}_{t-l}^{'}) \\
+& E[(\boldsymbol{r_{t}}-\boldsymbol{\mu})(\boldsymbol{r_{t-l}}-\boldsymbol{\mu})^{'}] = \boldsymbol{\Phi}E[(\boldsymbol{r_{t-1}}-\boldsymbol{\mu})(\boldsymbol{r_{t-l}}-\boldsymbol{\mu})^{'}]
+\end{aligned}
+$$
+que pode ser escrita usando $\boldsymbol{\Gamma}_{l}$ 
+
+$$
+\boldsymbol{\Gamma}_{l} = \boldsymbol{\Phi}\boldsymbol{\Gamma}_{l-1}
+$$
+onde $\boldsymbol{\Gamma}_{l}$ é a matriz de covariância cruzada de $\boldsymbol{r_{t}}$ para a defasagem $l$. 
+
+Sabemos que a divisão da matriz de covariância cruzada pela matriz de desvios-padrão proporcionará a correlação cruzada. Assim, teremos:
+
+$$
+\boldsymbol{\rho_{l}} = \boldsymbol{D^{-1}}\boldsymbol{\Phi}\boldsymbol{\Gamma_{l-1}}\boldsymbol{D^{-1}} = \boldsymbol{\Upsilon}\boldsymbol{\rho_{l-1}}
+$$
+onde $\boldsymbol{\Upsilon}= \boldsymbol{D^{-1}}\boldsymbol{\Phi}\boldsymbol{D^{-1}}$. Consequentemente, a matriz de correlação cruzada de um modelo **VAR(1)** será:
+
+$$
+\boldsymbol{\rho_{l}} = \boldsymbol{\Upsilon}^{l}\boldsymbol{\rho_{0}}
+$$
+para $l>0$.
+
+##### **VAR(p)**
+
+Uma série temporal multivariada $\boldsymbol{r_{t}}=(r_{1t},r_{2t},...,r_{kt})^{'}$ composta por $k$ componentes no tempo $t$ é um processo VAR de ordem $p$, ou $VAR(p)$, se para $p>0$ segue o modelo:
+
+
+$$
+\boldsymbol{r_{t}} = \boldsymbol{\phi}_{0} + \boldsymbol{\Phi}_{1}\boldsymbol{r_{t-1}} +...+\boldsymbol{\Phi}_{p}\boldsymbol{r}_{t-p} +  \boldsymbol{a_{t}}
+$$
+onde $\boldsymbol{\phi}_{0}$ é um vetor de dimensão $k$, $\boldsymbol{\Phi}_{j}$ são matrizes $k \times k$ para $j=1,...,p$ e $\boldsymbol{a_{t}}$ é um ruído branco formado por uma sequência de vetores aleatórios independentes e identicamente distribuídos com média $0$ e matriz de covariância $\boldsymbol{\sum_{a}}$. Na literatura, é frequentemente assumido que $\boldsymbol{a_{t}}$ segue uma distribuição Normal multivariada e que a matriz $\boldsymbol{\sum_{a}}$ é positiva definida. 
+
+Utilizando um operador de defasagem $B$, podemos reescrever o modelo como:
+
+$$
+(\boldsymbol{I}-\boldsymbol{\Phi}_{1}B-...-\boldsymbol{\Phi}_{p}B^{p})\boldsymbol{r}_{t}=\phi_0+\boldsymbol{a}_{t}
+$$
+onde $\boldsymbol{I}$ é uma matriz identidade $k \times k$. Esta representação também pode ser reescrita como:
+
+$$
+\boldsymbol{\Phi}(B)\boldsymbol{r}_{t}=\phi_0+\boldsymbol{a}_{t}
+$$
+onde $\boldsymbol{\Phi}(B)=\boldsymbol{I}-\boldsymbol{\Phi}_{1}B-...-\boldsymbol{\Phi}_{p}B^{p}$ é uma matriz polinomial. Se $\boldsymbol{r}_{t}$ é fracamente estacionário, então temos:
+
+$$
+\boldsymbol{\mu} = (\boldsymbol{I}-\boldsymbol{\Phi}_{1}-...-\boldsymbol{\Phi}_{p})^{-1}\boldsymbol{\phi}_0
+$$
+onde $(\boldsymbol{I}-\boldsymbol{\Phi}_{1}-...-\boldsymbol{\Phi}_{p})^{-1}$ deve ser não singular (determinante diferente de zero) para que o vetor de médias exista. Fazendo $\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{r_{t}}-\boldsymbol{\mu}$ o **VAR(p)** se torna:
+
+$$
+\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}_{1}\widetilde{\boldsymbol{r}}_{t-1}+...+\boldsymbol{\Phi}_{p}\widetilde{\boldsymbol{r}}_{t-p}+ \boldsymbol{a_{t}}
+$$
+
+Usando esta equação e o mesmo processo aplicado nas propriedades de estacionariedade do **VAR(1)**, obtemos:
+
+
+1. $Cov(\boldsymbol{r}_{t},\boldsymbol{a}_{t})=\boldsymbol{\sum_{a}}$ que é a matriz de covariância de $\boldsymbol{a}_{t}$
+2. $Cov(\boldsymbol{a_{t}},\boldsymbol{r_{t-l}})=\boldsymbol{0}$ para $l>0$ 
+3. $\boldsymbol{\Gamma}_{l} = \boldsymbol{\Phi}_{1}\boldsymbol{\Gamma}_{l-1}+...+\boldsymbol{\Phi}_{p}\boldsymbol{\Gamma}_{l-p}$ para $l>0$
+
+##### **ESTIMAÇÃO**
+
+Um modelo **VAR(p)** pode ser estimado por mínimos quadrados ordinários (MQO), método da máxima verossimilhança (MV) ou pelo procedimento bayesiano de estimação. Aqui, vamos mostrar brevemente como fazer uso de MQO e MV para obter os parâmetros do modelo **VAR(p)**.
+
+* **MÍNIMOS QUADRADOS ORDINÁRIOS**
+
+Suponha que temos a amostra $\left\{\boldsymbol{r}_{t}|t=1,,...,T \right\}$ para estimar um modelo **VAR(p)**. Os parâmetros de interesse são $\left\{\boldsymbol{\phi}_{0},\boldsymbol{\Phi}_{1},...,\boldsymbol{\Phi}_{p} \right\}$ e $\boldsymbol{\sum_{a}}$. Para a estimação via MQO, os dados disponíveis são $t=p+1,...,T$ e a equação a ser estimada é:
+
+$$
+\boldsymbol{r_{t}} = \boldsymbol{\phi}_{0} + \boldsymbol{\Phi}_{1}\boldsymbol{r}_{t-1} +...+\boldsymbol{\Phi}_{p}\boldsymbol{r}_{t-p} +  \boldsymbol{a_{t}}
+$$
+onde a matriz de covariância de $\boldsymbol{a_{t}}$ é $\boldsymbol{\sum_{a}}$. Considere o caso bivariado (isto é, $k=2$, $\boldsymbol{r_{t}} = (r_{1t},r_{2t})^{'}$ e $\boldsymbol{a_{t}}=(a_{1t},a_{2t})^{'}$) e o  modelo $VAR(p)$ pode ser escrito como:
+
+$$
+\begin{aligned}
+r_{1t} = \phi_{10} + \phi_{11}^{1}r_{1,t-1}+ \phi_{12}^{1}r_{2,t-1} +...+ \phi_{11}^{p}r_{1,t-p}+ \phi_{12}^{p}r_{2,t-p} + a_{1t} \\
+r_{2t} = \phi_{20} + \phi_{21}^{1}r_{1,t-1}+ \phi_{22}^{1}r_{2,t-1} +...+ \phi_{21}^{p}r_{1,t-p}+ \phi_{22}^{p}r_{2,t-p} +  a_{2t} \\
+\end{aligned}
+$$
+Que em formato matricial pode ser expresso como abaixo:
+
+$$
+\left[\begin{matrix} \boldsymbol{r}_{1} \\ \boldsymbol{r}_{2} \end{matrix} \right] = \left[ \begin{matrix}\boldsymbol{X}_{1} \\ \boldsymbol{0} \end{matrix}\begin{matrix} \boldsymbol{0} \\ \boldsymbol{X}_{2} \end{matrix} \right] \left[\begin{matrix} \boldsymbol{\beta}_{1} \\ \boldsymbol{\beta}_{2} \end{matrix} \right] + \left[\begin{matrix} \boldsymbol{A}_{1} \\ \boldsymbol{A}_{2} \end{matrix} \right]
+$$
+onde para cada série temporal (no nosso caso $k=1,2$) teremos:
+
+$$
+\boldsymbol{X}_{1} = \boldsymbol{X}_{2} = \begin{bmatrix}
+    1 & r_{1,p} & r_{2,p} & ... & r_{1,1} & r_{2,1} \\
+    1 & r_{1,p+1} & r_{2,p+1} &  ... & r_{1,2} & r_{2,2} \\
+\vdots & \vdots & \vdots & \vdots  &\vdots & \vdots \\
+    1 & r_{1,T-1} & r_{2,T-1} & ... & r_{1,T-1} & r_{2,T-1}
+  \end{bmatrix}
+$$
+e $\boldsymbol{r}_{k}= \left[r_{k,p+1}, ..., r_{k,T}\right]^{'}$, $\boldsymbol{\beta}_k = \left[\begin{matrix} {\phi}_{10} & {\phi}_{k1}^{1} & {\phi}_{k2}^{1} & ... & {\phi}_{k1}^{p} & {\phi}_{k2}^{p} \end{matrix} \right]^{'}$ e $\boldsymbol{A}_{k}= \left[a_{k,p+1}, ..., a_{k,T}\right]^{'}$.
+
+Note que aplicar o método de mínimos quadrados ordinários (MQO) sobre cada uma das equações do modelo **VAR(p)** gerará para cada equação (usando a notação matricial anterior):
+
+$$
+\boldsymbol{\hat{\beta}}_{k} = (\boldsymbol{X}_{1}^{'}\boldsymbol{X}_{1})^{-1}\boldsymbol{X}_{1}^{'}\boldsymbol{r}_{k}
+$$
+
+tal estimador é consistente e assintoticamente eficiente. Além disso, é igual ao estimador obtido por meio do método da máxima verossimilhança condicional. Em função de estarmos com as mesmas variáveis explicativas em cada equação (o retorno de cada ativo como função de suas defasagens e das defasagens dos outros ativos), o estimador obtido ao aplicar o método de mínimos quadrados em cada uma das equações separadamente é equivalente ao estimador obtido pelo método multivariado (todas as equações ao mesmo tempo). 
+
+O estimador de mínimos quadrados para a matriz de covariância dos erros será:
+
+$$
+\boldsymbol{\hat{\sum}_a} = \frac{1}{T-p - (kp+1)} \sum_{t=p+1}^{T}{\boldsymbol{\hat{a}_{t}}\boldsymbol{\hat{a}_{t}}^{'}}
+$$
+onde o denominador é a amostra efetiva (disponível para estimação) menos o número de parâmetros na equação para cada série temporal que compõe $\boldsymbol{r_{t}}$.
+
+* **VEROSSIMILHANÇA CONDICIONAL**
+
+Para estimação do modelo **VAR(p)** via máxima veorssimilhança assumimos que $\boldsymbol{a}_{t}$ segue uma distribuição Normal multivariada. Deixe $\boldsymbol{r}_{h:q}$ denotar as observações de $t=h$ até $t=q$ (inclusive). A função de verossimilhança condicional dos dados pode ser escrita como:
+
+$$
+\begin{aligned}
+L\left(\boldsymbol{r}_{(p+1):T}|\boldsymbol{r}_{1:p},\boldsymbol{\beta},\boldsymbol{\sum}_a\right) =  & \prod_{t=p+1}^{T}{p \left(\boldsymbol{r}_{t}|\boldsymbol{r}_{1:(t-1)},\boldsymbol{\beta},\boldsymbol{\sum}_a\right)} \\
+= & \prod_{t=p+1}^{T}{p \left(\boldsymbol{a}_{t}|\boldsymbol{r}_{1:(t-1)},\boldsymbol{\beta},\boldsymbol{\sum}_a\right)} \\
+= & \prod_{t=p+1}^{T}{p \left(\boldsymbol{a}_{t}|\boldsymbol{\beta},\boldsymbol{\sum}_a\right)} \\
+= & \frac{1}{(2\pi)^\frac{1}{2}\left| \boldsymbol{\sum}_a \right|^{\frac{1}{2}}} exp \left[\frac{-1}{2}\boldsymbol{a}_{t}{'}\boldsymbol{\sum}_a \boldsymbol{a}_{t}\right] \\
+\end{aligned}
+$$
+e o logaritmo da verossimilhança condicional se torna:
+
+$$
+\ln L \left(\boldsymbol{\beta},\boldsymbol{\sum}_a\right) = c - \frac{T-p}{2}log\left(\left| \boldsymbol{\sum}_a\right|\right)-\frac{1}{2}\sum_{t=p+1}^{T}{tr\left(\boldsymbol{a}_{t}{'}\boldsymbol{\sum}_a \boldsymbol{a}_{t}\right)}
+$$
+Assim, aplicando tal função de verossimilhança condicional aos dados do problema encontremos as estimativas para o vetor de parâmetros $\boldsymbol{\hat{\beta}}$ e $\boldsymbol{\hat{\sum}_a}$ que maximizam o logaritmo da verossimilhança condicional.
+
+##### **DEFININDO A ORDEM p DO MODELO:**
+
+Já sabemos da efetividade dos critérios de informação para selecionar um modelo estatístico. Basicamente, todos os critérios de informação são baseados em verossimilhança e consistem de dois componentes. 
+
+O primeiro está relacionado com a qualidade do ajuste do modelo enquanto o segundo penaliza modelos complicados (muitos parâmetros a serem estimados). A qualidade do ajuste de um modelo é frequentemente medido pela máxima verossimilhança. 
+
+Três critérios são comumente usados para determinar a ordem de um modelo **VAR(p)**. Assumindo que $\boldsymbol{a_{t}}$ segue uma distribuição Normal multivariada, esses três critérios para um **VAR(l)** são:
+
+$$
+AIC(l)= \ln \left| \boldsymbol{\hat{\sum}_{a,l}} \right| + \frac{2}{T}lk^{2}
+$$
+
+$$
+BIC(l)= \ln \left| \boldsymbol{\hat{\sum}_{a,l}} \right| + \frac{\ln(T)}{T}lk^{2}
+$$
+$$
+HQ(l)= \ln \left| \boldsymbol{\hat{\sum}_{a,l}} \right| + \frac{2\ln[\ln(T)]}{T}lk^{2}
+$$
+
+onde $T$ é o tamanho da amostra, $l$ a defasagem do modelo e $\boldsymbol{\hat{\sum}}_{a,l}$ é a estimativa de máxima verossimilhança para $\boldsymbol{\sum}_{a}$ que é a matriz de variâncias e covariâncias dos resíduos. Enquanto o critério AIC penaliza cada parâmetro por um fator $2$, BIC e HQ aplicam uma penalidade que depende do tamanho da amostra. Podemos seguir o seguinte processo:
+
+1. Estimar diversos modelos VAR com diferentes valores para $p$ por meio do método de máxima verossimilhança condicional;
+2. Escolher dentre os modelos aquele que apresente menor valor para algum critério de interesse.
+
+##### **DIAGNÓSTICO DO MODELO ESTIMADO:**
+
+Como já vimos no caso univariado, verificar o modelo também conhecido como analisar os resíduos tem um papel importante na construção de um modelo econométrico. Os principais objetivos desta análise são garantir que o modelo ajustado é adequado.
+
+Tipicamente, um modelo ajustado é dito ser adequado se:
+
+1. Todos os parâmetros estimados são estatísticamente significantes
+    * O objetivo é eliminar do modelo parâmetros que não são estatísticamente significantes. Se alguma variável não Granger-causa as outras variáveis, podemos encontrar coeficientes nulos. Além disso, os dados não podem ser ricos o suficiente para fornecer estimativas precisas. 
+    * Assim, simplificamos o modelo VAR estimado usando, por exemplo, o critério de manter apenas parâmetros que são estatísticamente significantes ao nível de 5\%.
+2. Os resíduos não apresentam autocorrelação serial, correlação cruzada ou heterocedasticidade condicional
+    * Os resíduos de um modelo adequado deveríam se comportar como um ruído branco. Para verificar a autocorrelação serial podemos fazer uso dos gráficos da FAC e FACP dos resíduos de cada equação do modelo estimado. O ideal é não ter defasagens significativas. 
+    * Já a correlação cruzada pode ser visualizada por meio de gráfico ou via teste estatístico (conforme explicado neste [link](https://rpubs.com/hudsonchavs/multiseries)).
+    * A presença de heterocedasticidade condicional viesa a análise dado que há o pressuposto que a variância do termo de erro de cada equação do modelo seja constante. A verificação da heterocedasticidade condicional pode ser feita pelo gráfico da FAC do quadrado dos resíduos de cada equação.
+3. Analisar a estabildiade do modelo estimado através dos autovalores associados ao mesmo:
+    * Em módulo os autovalores do modelo precisam ser menores que 1 para que o modelo seja estacionário
+    * Não podemos confundir a estacionariedade do modelo com a estacionariedade individual das séries
+4. Os resíduos não violam a hipótese de distribuição, por exemplo, Normal.
+
+##### **CAUSALIDADE DE GRANGER:**
+
+@granger1969investigating introduziu o conceito de causalidade, que é fácil de inserir a partir de um modelo VAR. Considere o caso de uma série temporal bivariada e a previsão $h$ passos à frente. Neste caso, podemos usar o modelo VAR e o modelo univariado para cada componente e produzir as previsões. 
+
+Dizemos que $r_{1t}$ causa $r_{2t}$ se a previsão bivariada de $r_{2t}$ tem maior acurácia do que a previsão univariada. Em outras palavra, sobre a abordagem de @granger1969investigating, dizemos que $r_{1t}$ causa $r_{2t}$ se as informações passadas de $r_{1t}$ aumentam a acurácia da previsão de $r_{2t}$ em relação a previsão obtida por meio de um modelo univariado para $r_{2t}$.
+
+Porém, o teste não informa nada a respeito de causalidade em termos literais, mas oferece evidências estatísticas de que oscilações passadas de uma variável estão correlacionadas com as de outra variável.
+
+Em um sistema bivariado, testar se $r_{2t}$ Granger-causa $r_{1t}$ equivale a estimar se para a equação abaixo, $\beta_{2,t-i}=0$ para qualquer $i=1,...,k$.
+
+$$
+r_{1t} = \mu_1 + \beta_{1,t-1}r_{1,t-1}+...+\beta_{1,t-p}r_{1,t-p}+\beta_{2,t-1}r_{2,t-1}+...+\beta_{2,t-k}r_{2,t-k}+\varepsilon_{1,t}
+$$
+Assim, temos o seguinte teste F convencional (para qualquer $i=1,...,k$):
+
+$$
+\begin{aligned}
+& H_{0}: \beta_{2,t-i}=0 &r_{2t}~\text{não Granger-causa}~r_{1t} \\
+& H_{1}: \beta_{2,t-i}\neq0 &r_{2t}~\text{Granger-causa}~r_{1t}
+\end{aligned}
+$$
+
+Basicamente, verificamos o p-valor da estatística de teste e decidimos se rejeitamos ou aceitamos a hipótese nula. Tal teste é realizado após a estimação de um modelo VAR. Além do objetivo proposto pelo teste, podemos utilizá-lo após estimar um modelo VAR e verificar que há defasagens não estatísticamente significantes e assim, decidir por retirá-las ou não de alguma equação do modelo VAR. 
+
+##### **FUNÇÃO IMPULSO-RESPOSTA:**
+
+Esta função mostra os efeitos de choques nas variáveis do sistema e possibilita calcular o impacto (sinal e magnitude) dinâmico de mudança em uma variável sobre ela e as demais variáveis do modelo ao longo do tempo. Assim, procura-se medir o efeito de um choque unitário em uma variável no período $t$ sobre todas as variáveis em períodos subsequentes. 
+
+Os coeficientes da função impulso-resposta são os coeficientes obtidos por meio da inversão do **VAR(p)** em um **Modelo Vetorial de Médias Móveis**, VMA($\infty$). Seja um **VAR(1)** com variáveis medidas em termos de desvios das médias, ou seja, $\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{r_{t}}-\boldsymbol{\mu}$:
+
+$$
+\widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-1}+\boldsymbol{a_{t}}
+$$
+Esta formulação é apenas uma forma diferente de escrever o modelo **VAR(1)** definido no início do texto. Substituindo $\widetilde{\boldsymbol{r}}_{t-1}$ recursivamente, produz:
+
+$$
+\begin{aligned}
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}(\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-2}+\boldsymbol{a}_{t-1})+\boldsymbol{a}_{t}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{2}\widetilde{\boldsymbol{r}}_{t-2}+\boldsymbol{\Phi}\boldsymbol{a}_{t-1}+\boldsymbol{a}_{t}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{2}(\boldsymbol{\Phi}\widetilde{\boldsymbol{r}}_{t-3}+\boldsymbol{a}_{t-2})+\boldsymbol{\Phi}\boldsymbol{a}_{t-1}+\boldsymbol{a}_{t}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{\Phi}^{3}\widetilde{\boldsymbol{r}}_{t-3}+\boldsymbol{\Phi}^{2}\boldsymbol{a}_{t-2}+\boldsymbol{\Phi}\boldsymbol{a}_{t-1}+\boldsymbol{a}_{t}\\ 
+& \widetilde{\boldsymbol{r}}_{t}=\boldsymbol{a_{t}} + \boldsymbol{\Phi}\boldsymbol{a}_{t-1} + \boldsymbol{\Phi}^{2}\boldsymbol{a}_{t-2} + \boldsymbol{\Phi}^{3}\boldsymbol{a}_{t-3}+... \\
+& \widetilde{\boldsymbol{r}}_{t} = \sum_{i=0}^{t-1}{\boldsymbol{\Phi}^{i}\boldsymbol{a}_{t-i}}~~\text{sendo}~\boldsymbol{\Phi}^{0}=\boldsymbol{I}
+\end{aligned}
+$$
+
+que é a inversão do **VAR(1)** em um **VMA($\infty$)**. A interpretação da função de impulso-resposta é dada por:
+
+$$
+\frac{\partial \boldsymbol{r_{t}}}{\partial \boldsymbol{a_{t-i}}} = \boldsymbol{\Phi}^{i}
+$$
+em que o elemento $(m,n)$ de $\Phi^{i}$ mostra o efeito de uma unidade de aumento no erro da variável $n$ no tempo $t$ sobre a variável $m$ no tempo $t+i$, mantendo-se constante todos os outros erros. Se as variáveis estão medidas nos logarítmos os valores da função impulso-resposta podem ser interpretados como elasticidades. Normalmente a análise da função impulso-resposta se prende ao valor da resposta ao choque unitário, ao sinal e quantos períodos leva para o efeito do choque desaparecer. Para um VAR estável esta função eventualmente descresce até atingir zero.
+
+Por exemplo, para um sistema consistindo de taxa de inflação $\left(r_{1t}\right)$ e taxa de juros $\left(r_{2t}\right)$, o efeito de um aumento na taxa de inflação pode ser de interesse. No mundo real, tal incremento ou choque pode ser exogeneamente originado fora do sistema por eventos como a greve dos caminhoneiros. Assim, suponha o sistema:
+
+$$
+\boldsymbol{r_{t}} = \left[\begin{matrix} r_{1t} \\ r_{2t} \end{matrix} \right]
+$$
+e que ocorreu um choque na inflação. Para isolar tal efeito, suponha que os juros bem como a inflação assumem seu valor médio antes de $t=0$, ou seja, que $\boldsymbol{r_{t}} = \boldsymbol{\mu}$ para $t < 0$. O aumento na inflação por uma unidade no período $t=0$ será $a_{10}=1$.
+
+Agora, podemos mapear o que acontece com o sistema durante os períodos $t=1,2,...$ se nenhum outro choque ocorrer, ou seja, $\boldsymbol{a}_{2}=...=\boldsymbol{a}_{t}=\boldsymbol{0}$. Além disso, se assumirmos que as duas variáveis tem média igual a zero ($\phi_{0}=0$) e que são modeladas por um $VAR(1)$ que pode ser escrito como:
+
+$$
+\boldsymbol{r}_{t}=\boldsymbol{\Phi}\boldsymbol{r}_{t-1}+\boldsymbol{a_{t}}
+$$
+Supondo que já conhecemos a matriz $\boldsymbol{\Phi}$, o modelo é reescrito como:
+
+$$
+\boldsymbol{r_{t}} = \left[\begin{matrix} r_{1t} \\ r_{2t} \end{matrix} \right] = \left[ \begin{matrix}0.5 \\ 0.1 \end{matrix}\begin{matrix} 0 \\ 0.1 \end{matrix} \right] \left[\begin{matrix} {r}_{1,t-1} \\ {r}_{2,t-1} \end{matrix} \right] + \left[\begin{matrix} {a}_{1t} \\ {a}_{2t} \end{matrix} \right]
+$$
+
+Adicionando no sistema um choque unitário na primeira variável (inflação) em $t=0$, temos:
+
+$$
+\boldsymbol{r_{0}} = \left[\begin{matrix} r_{10} \\ r_{20} \end{matrix} \right] = \left[\begin{matrix} 1 \\ 0 \end{matrix} \right]
+$$
+
+$$
+\boldsymbol{r_{1}} = \boldsymbol{\Phi}\boldsymbol{r}_{0}  \Rightarrow  \left[\begin{matrix} r_{11} \\ r_{21} \end{matrix} \right]  = \left[ \begin{matrix}0.5 \\ 0.1 \end{matrix}\begin{matrix} 0 \\ 0.1 \end{matrix} \right]\left[\begin{matrix} 1 \\ 0 \end{matrix} \right] = \left[\begin{matrix} 0.5 \\ 0.1 \end{matrix} \right]
+$$
+
+
+$$
+\boldsymbol{r_{2}} = \boldsymbol{\Phi}\boldsymbol{r}_{1} = \boldsymbol{\Phi}\boldsymbol{\Phi}\boldsymbol{r}_{0} = \boldsymbol{\Phi}^2\boldsymbol{r}_{0} \Rightarrow  \left[\begin{matrix} r_{12} \\ r_{22} \end{matrix} \right]  = \left[ \begin{matrix}0.5 \\ 0.1 \end{matrix}\begin{matrix} 0 \\ 0.1 \end{matrix} \right] \left[ \begin{matrix}0.5 \\ 0.1 \end{matrix}\begin{matrix} 0 \\ 0.1 \end{matrix} \right]\left[\begin{matrix} 1 \\ 0 \end{matrix} \right] = \left[\begin{matrix} 0.25 \\ 0.06 \end{matrix} \right]\left[\begin{matrix} 1 \\ 0 \end{matrix} \right] = \left[\begin{matrix} 0.25 \\ 0.06 \end{matrix} \right]
+$$
+Perceba que $\boldsymbol{r_{i}}= \left(r_{1i},r_{2i}\right)^{'}$ é a primeira coluna de ${\boldsymbol{\Phi}^{i}}$ que é obtida de:
+
+$$
+\boldsymbol{r}_{t}=\boldsymbol{\Phi}^{i}\boldsymbol{a_{i}}
+$$
+onde $\boldsymbol{a_{i}^{'}}=\left(0,0,...,1,...,0\right)$ e os elementos de $\boldsymbol{\Phi}^{i}$ representam o efeito de um choque unitário nas variáveis do sistema depois de $i$ períodos. 
+
+* **FUNÇÃO IMPULSO-RESPOSTA ORTOGONALIZADA**
+
+Uma hipótese problemática no tipo de resposta ao impulso mostrada anteriormente é que este choque ocorre apenas em uma variável em um tempo. Tal hipótese é razoável se as variáveis são independentes. 
+
+Em geral, a matriz de variância e covariância do termo de erro $\boldsymbol{a}_t$ não é diagonal, ou seja, existe correlação contemporânea entre os erros das diferentes equações do modelo VAR. Assim, os choques são contemporâneamente correlacionados e isso impede que se tenha o efeito puro/líquido de cada choque. 
+
+Quando ocorre choque em uma variável do sistema seu efeito se confunde com o efeito advindo da correlação dos erros de outras variáveis. Não há como garantir que o choque ocorre em cada variável isoladamente. Para contornar este problema é necessário transformar os erros em erros ortogonais que terão matriz de variância e covariâncias diagonal. Esta operaçãopode ser denominada de ortogonalização dos erros ou diagonolização da matriz de variâncias e covariâncias. 
+
+##### **DECOMPOSIÇÃO DA VARIÂNCIA DO ERRO DE PREVISÃO:**
+
+Uma análise complementar à função de impulso-resposta é a decomposição da variância do erro de previsão que procura determinar qual a percentagem da variância do erro de previsão de uma variável que é devido a ela e qual percentagem é devido a cada uma das outras variáveis do modelo ao longo do horizonte de previsão. Esta análise fornece elementos para se inferir sobre causalidade ao longo de um período temporal e sobre qual variável é mais exógena no sistema.
+
+As previsões obtidas com o modelo VAR contém dois elementos: o valor esperado para a variável e o choque inesperado em cada equação. A decomposição de variância inicia com o cálculo da variância do erro de previsão do VAR na forma de médias móveis, isto é, na forma invertida **VMA($\infty$)**. Assim, o erro de previsão $h$ períodos à frente no modelo **VAR(p)** na forma **VMA($\infty$)** é dado por:
+
+$$
+\widetilde{\boldsymbol{r}}_{t+h}-E\left[\widetilde{\boldsymbol{r}}_{t+h}|T\right]=\boldsymbol{a}_{t+h} + \boldsymbol{\Phi}\boldsymbol{a}_{t+h-1} + \boldsymbol{\Phi}^{2}\boldsymbol{a}_{t+h-2} + \boldsymbol{\Phi}^{3}\boldsymbol{a}_{t+h-3}+... \\
+$$
+O lado esquerdo desta equação é a diferença entre o valor observado do vetor de variáveis endógenas no tempo $t+h$ e o valor previsto pelo VAR. O lado direito é a representação **VMA($\infty$)** dos erros de previsão. Observe que o erro de previsão corrente depende dos termos de erros passados. A análise precisa ser feita com os erros ortogonais.
+
+A decomposição da variância do erro de previsão é, normalmente, apresentada em forma de tabela que indica a percentagem do erro de previsão de uma variável que pode ser atribuída a ela e a cada uma das outras do sistema $h$ períodos à frente depois do choque. Uma variável tipicamente exógena terá alta percentagem explicada por ela própria por um longo período. Se uma variável é importante para a dinâmica temporal de outra variável, um erro de previsão na primeira variável terá efeito sobre o erro de previsão na segunda.
+
+Basicamente, a análise concentra no percentual da variância do erro de previsão de uma variável que decorre dela e de cada uma das outras, se o percentual varia ao longo do horizonte e por quantos períodos uma variável permanece importante para explicar a outra. 
+
+##### **MODELO VETORIAL AUTORREGRESSIVO ESTRUTURAL (SVAR)**
+
+Nesta parte vamos apresentar o modelo VAR estrutural (SVAR) como uma extensão do modelo VAR mostrado anteriormente. Apesar do modelo VAR conseguir captar as características dinâmicas de séries temporais multivariadas, identificamos a necessidade de transformar a matriz de variância e covariâncias dos erros para se ter choques ortogonais, isto é, não correlacionados, para a análise correta das funções de impulso-resposta e decomposição do erro de previsão. 
+
+Contudo, mesmo tendo erros ortogonais surge a dificuldade de como interpretar as funções impulso-resposta sem referência à teoria econômica. A incorporação da teoria para definir as relações contemporâneas entre as variáveis conduz ao VAR na forma estrutural (SVAR).
+
+* **DO VAR PARA O SVAR**
+
+Uma série temporal multivariada $\boldsymbol{r_{t}}=(r_{1t},r_{2t},...,r_{kt})^{'}$ composta por $k$ componentes no tempo $t$ é um processo VAR de ordem $p$, ou $VAR(p)$, se para $p>0$ segue o modelo:
+
+
+$$
+\boldsymbol{r_{t}} = \boldsymbol{\phi}_{0} + \boldsymbol{\Phi}_{1}\boldsymbol{r_{t-1}} +...+\boldsymbol{\Phi}_{p}\boldsymbol{r}_{t-p} +  \boldsymbol{a_{t}}
+$$
+onde $\boldsymbol{\phi}_{0}$ é um vetor de dimensão $k$, $\boldsymbol{\Phi}_{j}$ são matrizes $k \times k$ para $j=1,...,p$ e $\boldsymbol{a_{t}}$ é um ruído branco formado por uma sequência de vetores aleatórios independentes e identicamente distribuídos com média $0$ e matriz de covariância $\boldsymbol{\sum_{a}}$.
+
+Assumindo $\boldsymbol{\phi}_{0}=0$ para simplificar a notação e assumindo a representação de médias móveis, **VMA($\infty$)**, dada por:
+
+$$
+\begin{aligned}
+\boldsymbol{r}_{t}=\boldsymbol{a_{t}} + \boldsymbol{\Phi}\boldsymbol{a}_{t-1} + \boldsymbol{\Phi}^{2}\boldsymbol{a}_{t-2} + \boldsymbol{\Phi}^{3}\boldsymbol{a}_{t-3}+... 
+\end{aligned}
+$$
+em que $\widetilde{\boldsymbol{r}}_{t} = \sum_{i=0}^{t-1}{\boldsymbol{\Phi}^{i}\boldsymbol{a}_{t-i}}~~\text{sendo}~\boldsymbol{\Phi}^{0}=\boldsymbol{I}$. 
+
+Como vimos, os coeficntes das matrizes $\boldsymbol{\Phi}^{i}$ fornecem as respostas das variáveis a choques nos sistema, constituindo as funções impulso-resposta. Porém, quando os erros $\boldsymbol{a_{t}}$ são contemporaneamente correlacionados esses coeficientes não refletem de forma adequada os efeitos dos choques nas variáveis do sistema. Assim, os erros devem ser ortogonalizados de modo a apresentarem matriz de variâncias e covariâncias diagonal (ausência de covariância). A ortogonalização consiste em uma transformação dos erros gerando outro vetor de erros com  matriz de variâncias e covariâncias diagonal. No entanto, esta transformação envolve modificar todo o modelo o que traz consequências para o relacionamento contemporâneo entre as variáveis.
+
+Dado $\boldsymbol{\sum_{a}}$ simétrica e positiva definida, existe uma matriz $P$ não singular (determinante diferente de zero) tal que $\boldsymbol{P}\boldsymbol{\sum_{a}}\boldsymbol{P}^{'}$ é uma matriz diagonal. Multiplicando o modelo por $\boldsymbol{P}$, tem-se:
+
+$$
+\begin{aligned}
+&&& \boldsymbol{P}\boldsymbol{r}_{t} = \boldsymbol{P} \boldsymbol{\Phi}_{1}\boldsymbol{r_{t-1}} +...+\boldsymbol{P}\boldsymbol{\Phi}_{p}\boldsymbol{r}_{t-p} + \boldsymbol{P}\boldsymbol{a_{t}} \\
+\\
+&&& \boldsymbol{P}\boldsymbol{r}_{t} = \boldsymbol{\Phi}_{1}^{*}\boldsymbol{r_{t-1}} +...+\boldsymbol{\Phi}_{p}^{*}\boldsymbol{r}_{t-p} + \boldsymbol{u_{t}} \\
+\end{aligned}
+$$
+que constitui um novo modelo, com novo erro $\boldsymbol{u_{t}}= \boldsymbol{P}\boldsymbol{a_{t}}$ e com o termo $\boldsymbol{P}\boldsymbol{r}_{t}$ do lado esquerdo que incorpora relações contemporâneas entre as variáveis do sistema. 
+
+Tal modelo é conhecido como VAR Estrutural que permite a análise de funções impulso-resposta ortogonais, decomposição da variância do erro de previsão e estimativas de coeficientes de relações contemporâneas entre as variáveis. A matriz de variâncias e covariâncias dos erros estruturais é dada por:
+
+$$
+Var(\boldsymbol{u_{t}}) = \boldsymbol{\sum_{u}} = E\left[\boldsymbol{u_t}\boldsymbol{u_{t}^{'}}\right] = E\left[\boldsymbol{P}\boldsymbol{a_{t}}\boldsymbol{a_{t}^{'}}\boldsymbol{P}^{'}\right] = \boldsymbol{P}E\left[\boldsymbol{a_{t}}\boldsymbol{a_{t}^{'}}\right]\boldsymbol{P}^{'} = \boldsymbol{P}\boldsymbol{\sum_{a}}\boldsymbol{P}^{'}
+$$
+
+* **DO SVAR PARA O VAR**
+
+De forma alternativa, podemos definir um VAR a partir de um SVAR. Considere o seguinte modelo SVAR:
+
+$$
+\begin{aligned}
+\boldsymbol{A}\boldsymbol{r}_{t} = \boldsymbol{A}_{1}^{*}\boldsymbol{r_{t-1}} +...+\boldsymbol{A}_{p}^{*}\boldsymbol{r}_{t-p} + \boldsymbol{B}\boldsymbol{u_{t}} \\
+\end{aligned}
+$$
+
+Pré-multiplicando por $\boldsymbol{A}^{-1}$, temos:
+
+$$
+\begin{aligned}
+&&& \boldsymbol{A}^{-1}\boldsymbol{A}\boldsymbol{r}_{t} = \boldsymbol{A}^{-1}\boldsymbol{A}_{1}^{*}\boldsymbol{r_{t-1}} +...+\boldsymbol{A}^{-1}\boldsymbol{A}_{p}^{*}\boldsymbol{r}_{t-p} + \boldsymbol{A}^{-1}\boldsymbol{B}\boldsymbol{u_{t}} \\
+\\
+&&& \boldsymbol{r}_{t} =  \boldsymbol{\Phi}_{1}\boldsymbol{r_{t-1}} +...+\boldsymbol{\Phi}_{p}\boldsymbol{r}_{t-p} + \boldsymbol{a_{t}} 
+\end{aligned}
+$$
+
+que é um VAR padrão e $\boldsymbol{a_{t}}=\boldsymbol{A}^{-1}\boldsymbol{B}\boldsymbol{u_{t}}$, ou , $\boldsymbol{A}\boldsymbol{a_{t}} = \boldsymbol{B}\boldsymbol{u_{t}}$. 
+
+Observe que $\boldsymbol{a_{t}}$ são os erros do modelo VAR na sua forma reduzida (correlacionados) enquanto que $\boldsymbol{u_{t}}$ são os erros da forma estrutural (não correlacionados).
+
+* **IDENTIFICAÇÃO**
+
+Como é possível observar, o modelo estrutural não é observável, mas a forma reduzida pode ser estimada. A estratégia é especificar e estimar o VAR e depois estimar o SVAR e concentrar na análise de funções impulso-resposta, decomposição de variância e relações contemporâneas entre as variáveis. 
+
+Para estimar o SVAR temos que resolver primeiro o problema de **identificação**. Será que a partir da estimativa de $\boldsymbol{\sum_{a}}$ é possível obter estimativas dos coeficientes de $\boldsymbol{A}$ e $\boldsymbol{B}$ do modelo estrutural?
+
+Para isso, é preciso impor restrições nas matrizes $\boldsymbol{A}$ e $\boldsymbol{B}$. O número de restrições necessário para alcançar identificação depende da relação entre o número de coeficientes estimados na forma reduzida e o número de coeficientes a serem obtidos na forma estrutural. É um problema de número de incógnitas e de número de equações (relações) semelhante à condição de ordem em equações simultâneas. 
+
+O número de parâmetros do VAR que servem para identificar os elementos das matrizes $\boldsymbol{A}$ e $\boldsymbol{B}$ é o número de coeficientes não redundantes da matriz de variâncias e covariâncias $\boldsymbol{\sum_{a}}$. Os coeficientes das variáveis defasadas não contam. Como $\boldsymbol{\sum_{a}}$ é simétrica, temos $\frac{k\left(k+1\right)}{2}=\frac{k^2+k}{2}$ coeficientes que é o número máximo de elementos identificáveis em $\boldsymbol{A}$ e $\boldsymbol{B}$. Se nosso modelo tem $3$ variáveis, teremos $\frac{3\left(3+1\right)}{2}=6$ elementos em $\boldsymbol{\sum_{a}}$ e só podemos identificar 6 elementos em $\boldsymbol{A}$ e $\boldsymbol{B}$. Por outro lado, se nosso modelo tem $4$ variáveis, teremos $\frac{4\left(4+1\right)}{2}=10$ elementos em $\boldsymbol{\sum_{a}}$ e só podemos identificar $10$ elementos em $\boldsymbol{A}$ e $\boldsymbol{B}$.
+
+Resumindo, temos $k$ elementos em $\boldsymbol{A}$ e $k$ elementos em $\boldsymbol{B}$ totalizando $2k^2$ elementos a serem identificados em $A$ e $B$ (por exemplo, para $k=2$ as matrizes $\boldsymbol{A}$ e $\boldsymbol{B}$ são $2 \times 2$ e teremos $4$ elementos em cada, totalizando $2k^2=8$ elementos a serem identificados). Porém, como mostramos anteriormente, apenas $\frac{k\left(k+1\right)}{2}=\frac{k^2+k}{2}$ destes elementos são observados/estimados pela matriz $\boldsymbol{\sum_{a}}$.
+
+Para identificar $2k^2$ coeficientes desconhecidos a partir de $\frac{k\left(k+1\right)}{2}$ valores de 
+$\boldsymbol{\sum_{a}}$, será necessário impor $2k^2 - \frac{k\left(k+1\right)}{2} = k^2 + \frac{k\left(k-1\right)}{2}$ restrições nas matrizes $\boldsymbol{A}$ e $\boldsymbol{B}$.
+
+Com base em $\boldsymbol{A}\boldsymbol{a_{t}} = \boldsymbol{B}\boldsymbol{u_{t}}$ e dependendo das restrições impostas, três tipos de modelos SVAR podem ser definidos: 
+
+* **MODELO A**
+
+Neste modelo a idéia é modelar as relações contemporâneas entre as variáveis diretamente pela matriz $\boldsymbol{A}$ considerando $\boldsymbol{B} = \boldsymbol{I}_k$, isto é:
+
+$$
+\boldsymbol{A}\boldsymbol{a_{t}} = \boldsymbol{u_{t}}
+$$
+o que reduz o número de valores desconhecidos de $2k^2$ para $k^2$, pois só temos a matriz $\boldsymbol{A}$ a ser identificada. Assim, o número mínimo de restrições para identificação será $\frac{k\left(k-1\right)}{2}$. 
+
+Por exemplo, em um sistema de $4$ variáveis temos $16$ elementos a serem identificados. Os elementos estimados são $10$ da matriz $\boldsymbol{\sum_{a}}$. Logo, temos que impor, no mínimo $6$ restrições. A matriz $\boldsymbol{A}$ seria:
+
+$$
+\boldsymbol{A} = \begin{bmatrix}
+a_{11} & 0 & 0  & 0 \\ 
+a_{21} & a_{22} & 0 & 0\\ 
+a_{31} & a_{32} & a_{33} & 0\\ 
+a_{41} & a_{42} & a_{43} & a_{44} 
+\end{bmatrix}
+$$
+
+Assim, o sistema é exatamente identificado. Se colocarmos $1$ na diagonal principal o sistema fica super identificado. Se a teroai indica um relacionamento contemporâneo não recursivo, os zeros podem aparecer em posições diferentes fora da diagonal principal. 
+
+
+* **MODELO B**
+
+Neste modelo, ao invés de modelar diretamente as relações contemporâneas entre as variáveis, especifica-se as relações entre os erros identificando-se os choques estruturais diretamente pelos choques da forma reduzida. A matriz $\boldsymbol{A}$ é considerada identidade, isto é, $\boldsymbol{A}=\boldsymbol{I}_k$. Logo,
+
+$$
+\boldsymbol{a_{t}} = \boldsymbol{B}\boldsymbol{u_{t}}
+$$
+Ou seja, os erros da forma reduzida são funções lineares dos erros estruturais. O número mínimo de restrições para identificação também é $\frac{k\left(k-1\right)}{2}$. 
+
+* **MODELO AB**
+
+É o modelo que considera os dois tipos de restrições simultâneamente, ou seja:
+
+$$
+\boldsymbol{A}\boldsymbol{a_{t}} = \boldsymbol{B}\boldsymbol{u_{t}}
+$$
+
+Como $\boldsymbol{A}$ e $\boldsymbol{B}$ têm $k^2$ elementos cada, temos que impor no mínimo $k^2 + \frac{k\left(k-1\right)}{2}$ restrições para identificação.
+
+Para o exemplo do modelo VAR do BACEN apresentado em sala de aula, poderíamos estimar um SVAR do tipo AB (ignorando as defasagens de $\boldsymbol{r_{t}}$ e $\phi_0$), como segue:
+
+$$
+\begin{aligned}
+&&& \boldsymbol{A}\boldsymbol{r_{t}} = \boldsymbol{B}\boldsymbol{u_{t}} \\
+\\ 
+&&& \begin{bmatrix}
+1 & 0 & 0  & 0 \\ 
+a_{21} & 1 & 0 & 0\\ 
+a_{31} & a_{32} & 1 & 0\\ 
+a_{41} & a_{42} & a_{43} & 1
+\end{bmatrix}\begin{bmatrix}
+\Delta juros \\ 
+\Delta cambio \\ 
+\Delta adm \\ 
+\Delta livres
+\end{bmatrix} = 
+\begin{bmatrix}
+b_{11} & 0 & 0  & 0 \\ 
+0 & b_{22} & 0 & 0  \\ 
+0 & 0 & b_{33} & 0  \\ 
+0 & 0 & 0 & b_{44}
+\end{bmatrix} \begin{bmatrix}
+u_{juros} \\ 
+u_{cambio} \\ 
+u_{adm} \\ 
+u_{livres}
+\end{bmatrix}
+\\
+\end{aligned}
+$$
+
+
+Como $k=4$, é necessário um mínimo de $2k^2 - \frac{k\left(k+1\right)}{2} = k^2 + \frac{k\left(k-1\right)}{2} = 22$ restrições em $\boldsymbol{A}$ e $\boldsymbol{B}$ para identificação do modelo. Observe que exatamenteo $22$ restrições foram impostas e o sistema é **exatamente identificado**.  
+
+Se chamarmos $\boldsymbol{r_{t-1}},...,\boldsymbol{r_{t-p}}$ de "termos defasados", o modelo pode ser escrito como:
+
+$$
+\begin{aligned}
+&&& \Delta juros_{t} = \phi_{10} + \text{termos defasados}~ + b_{11}u_{juros} \\
+\\
+&&& \Delta cambio_{t} = \phi_{20} -a_{21} \Delta juros_{t}~+\text{termos defasados}~ + b_{22}u_{cambio} \\
+\\
+&&& \Delta adm_{t} = \phi_{30} -a_{31} \Delta juros_{t}-a_{32} \Delta cambio_{t}~+\text{termos defasados}~ + b_{33}u_{adm} \\
+\\
+&&& \Delta livres_{t} = \phi_{40} -a_{41} \Delta juros_{t}-a_{42} \Delta cambio_{t}-a_{43} \Delta adm_{t}~+\text{termos defasados}~ + b_{44}u_{livres} \\
+\end{aligned}
+$$
+Observe que a forma como escrevemos as matrizes $\boldsymbol{A}$ e $\boldsymbol{B}$ definiram que a variável mais endógena é $\Delta livres$ e a mais exógena é $\Delta juros$. Isso é de suma importância quando temos embasamento teórico capaz de sustentar esta escolha. 
+
+Perceba que a forma de especificação de $\boldsymbol{A}$ altera a caracterização das variáveis como mais endógenas e mais exógenas. Por exemplo, caso optássemos por:
+
+$$
+\begin{aligned}
+&&& \begin{bmatrix}
+1 & 0 & 0  & 0 \\ 
+0 & 1 & 0 & 0\\ 
+a_{31} & 0 & 1 & 0\\ 
+a_{41} & 0 & a_{43} & 1
+\end{bmatrix}\begin{bmatrix}
+\Delta juros \\ 
+\Delta cambio \\ 
+\Delta adm \\ 
+\Delta livres
+\end{bmatrix} = 
+\begin{bmatrix}
+b_{11} & 0 & 0  & 0 \\ 
+0 & b_{22} & 0 & 0  \\ 
+0 & 0 & b_{33} & 0  \\ 
+0 & 0 & 0 & b_{44}
+\end{bmatrix} \begin{bmatrix}
+u_{juros} \\ 
+u_{cambio} \\ 
+u_{adm} \\ 
+u_{livres}
+\end{bmatrix}
+\\
+\end{aligned}
+$$
+
+Como $k=4$, é necessário um mínimo de $2k^2 - \frac{k\left(k+1\right)}{2} = k^2 + \frac{k\left(k-1\right)}{2} = 22$ restrições em $\boldsymbol{A}$ e $\boldsymbol{B}$ para identificação do modelo. Observe que $25$ restrições foram impostas e o sistema é **super identificado**.  
+
+Se chamarmos $\boldsymbol{r_{t-1}},...,\boldsymbol{r_{t-p}}$ de "termos defasados", o modelo pode ser escrito como:
+
+$$
+\begin{aligned}
+&&& \Delta juros_{t} = \phi_{10} + \text{termos defasados}~ + b_{11}u_{juros} \\
+\\
+&&& \Delta cambio_{t} = \phi_{20} ~+\text{termos defasados}~ + b_{22}u_{cambio} \\
+\\
+&&& \Delta adm_{t} = \phi_{30} -a_{31} \Delta juros_{t}~+\text{termos defasados}~ + b_{33}u_{adm} \\
+\\
+&&& \Delta livres_{t} = \phi_{40} -a_{41} \Delta juros_{t}-a_{42} \Delta cambio_{t}~+\text{termos defasados}~ + b_{44}u_{livres} \\
+\end{aligned}
+$$
+Agora, temos duas variáveis mais exógenas no sistema que são $\Delta juros$ e $\Delta cambio$ enquanto que a variável mais endógena continua sendo $\Delta livres$.
+
+Como outro exemplo, suponha o modelo apresentado por @lutkepohl2005new envolvendo as variáveis produto ($q_t$), taxa de juros ($i_t$) e moeda ($m_t$). Os erros da forma reduzida são denotados por:
+
+$$
+\boldsymbol{a_{t}} = \left(a_{t}^{q}, a_{t}^{i}, a_{t}^{m} \right)^{'}
+$$
+e os erros estruturais por:
+
+$$
+\boldsymbol{u_{t}} = \left(u_{t}^{IS}, u_{t}^{LM}, u_{t}^{m} \right)^{'}
+$$
+De acordo com uma visão keynesiana a relação entre os erros da forma reduzida e os erros estruturais é dada por:
+
+$$
+\begin{aligned}
+& a_{t}^{q} =  -a_{12}a_{t}^{i} + b_{11}u_{t}^{IS}~~\text{que representa a curva IS} \\
+& \\
+& a_{t}^{i} =  -a_{21}a_{t}^{q} -a_{23}a_{t}^{m} + b_{22}u_{t}^{LM}~~\text{que representa a curva LM} \\
+\\
+& a_{t}^{m} =  b_{33}u_{t}^{m}~~\text{que representa a regra de oferta de moeda} \\
+\end{aligned}
+$$
+
+A primeira equação representa uma curva IS com um parâmetro negativo para o termo de erro da taxa de juros e um choque estrutural na própria IS. A segunda equação é melhor entendida resolvendo a demanda por moeda em função do termo derro na taxa de juros, ou seja,  $a_{t}^{m} = \beta_{1}a_{t}^{q} + \beta_{2}a_{t}^{i} + u_{t}^{LM}$ de onde se tira que $\beta_{1}$ deve ser positivo porque mais moeda é necessário para um maior volume de transação e que $\beta_{2}$ deve ser negativo porque quanto mais alta a taxa de juros maior o custo de se reter moeda e, consequentemente, menor a quantidade de moeda será demandada. Por fim, a terceira equação postula que o termo de erro da base monetária é determinado por choques exógenos na oferta monetária. As três equações forma um **modelo AB** que pode ser escrito na forma $\boldsymbol{A}\boldsymbol{a_{t}} = \boldsymbol{B}\boldsymbol{u_{t}}$:
+
+$$
+\begin{bmatrix}
+ 1 & a_{12} & 0 \\ 
+ a_{21} & 1 & a_{23} \\ 
+ 0 & 0  & 1
+\end{bmatrix} \boldsymbol{a_{t}} = 
+\begin{bmatrix}
+ b_{11} & 0 & 0 \\ 
+ 0 & b_{22} & 0  \\ 
+ 0 & 0  & b_{33}
+\end{bmatrix}\boldsymbol{u_{t}}
+$$
+
+Como $k=3$, é necessário um mínimo de $2k^2 - \frac{k\left(k+1\right)}{2} = k^2 + \frac{k\left(k-1\right)}{2} = 12$ restrições em $\boldsymbol{A}$ e $\boldsymbol{B}$ para identificação do modelo. Com três $1$ e três $0$ em $\boldsymbol{A}$ e seis $0$ em $\boldsymbol{B}$ a condição é satisfeita e o modelo é exatamente identificado. 
+
+
+##### **PROCESSO DE ESTIMAÇÃO**
+
+Abaixo, os passos para estimação e avaliação dos modelos VAR, SVAR e VEC. Apesar de ainda não termos estudado os modelos VEC (próxima etapa da disciplina), o processo aqui considera tal modelo. Porém, perceba que dependendo das decisões nas etapas, seguimos com a estimação dos modelos VAR e SVAR. 
+
+1. Visualizar os dados e identificar observações fora do padrão (outliers, sazonalidade, tendência)
+2. Se necessário, transformar os dados para estabilizar a variância (logaritmo ou retirar sazonalidade, por exemplo)
+3. Avaliar a função de correlação cruzada para confirmar a possibilidade de modelagem multivariada.
+4. Testar se os dados são estacionários ou cointegrados:
+    * Caso não tenha raiz unitária (estacionários), estimar VAR com as séries em nível
+    * Caso tenha raiz unitária, mas sem cointegração é preciso diferenciar os dados até se tornarem estacionários e estimar VAR com as séries diferenciadas
+    * Caso tenha raiz unitária, mas com cointegração devemos estimar o VEC com as séries em nível
+5. Definir a ordem $p$ para os dados em análise por meio de critérios de informação (escolher modelo com menor AIC, por exemplo)
+6. Estimar o modelo escolhido no passo 4
+    * Se VAR (forma reduzida):
+        - Verificar significância estatística do modelo estimado e, caso seja necessário, eliminar parâmetros não significantes.
+        - Analisar a causalidade de Granger (variáveis que não granger causa as demais podem ser retiradas do modelo)
+    * Se SVAR (forma estrutural):
+        - Definir a estrutura para as matrizes A e B e o modelo de interesse (A, B ou AB)
+        - Verificar significância estatística do modelo estimado e, caso seja necessário, eliminar parâmetros não significantes.
+        - Analisar a causalidade de Granger (variáveis que não granger causa as demais podem ser retiradas do modelo)
+    * Se VEC (Modelo Vetorial de Correção de Erros)
+        - Usar a quantidade de vetores de cointegração obtidos no teste de cointegração para estimar o modelo VEC
+8. Examinar se os resíduos se comportam como ruído branco e condições de estacionariedade do modelo. Caso contrário, retornar ao passo 3 ou 4.
+    * Verificar a autocorrelação serial por meio da FAC e FACP dos resíduos de cada equação do modelo estimado. O ideal é não ter defasagens significativas.
+    * Verificar correlação cruzada por meio da FCC dos resíduos.
+    * Analisar a estabildiade do modelo estimado através dos autovalores associados ao mesmo.
+    * Verificar a distribuição de probabilidade (Normal) para os resíduos de cada equação do modelo.
+    * Analisar heterocedasticidade condicional (resíduos devem ser homocedasticos, ou seja, variância condicional constante)
+9. Uma vez que os resíduos são ruído branco e o modelo é estável:
+    * Analisar funções de resposta ao impulso
+    * Analisar a importância das variáveis para explicar a variância do erro de previsão de cada variável
+    * Fazer previsões paras as variáveis do modelo
+
+
+##### **REFERÊNCIAS**
