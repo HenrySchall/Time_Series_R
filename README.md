@@ -123,7 +123,7 @@ Estatística de teste:
 - *H0: A amostra segue uma distribuição normal (W-obtido < W-crítico)*
 - *H1: A amostra não segue uma distribuição normal (W-obtido > W-crítico)*
 
-![Caderno sem título-3](https://github.com/HenrySchall/Time-Series/assets/96027335/b5ca7281-9797-4bef-80b1-4686e7360a4b)
+![img46](https://github.com/HenrySchall/Time-Series/assets/96027335/64ca5aa1-d601-44b1-8d21-16ec79400211)
 
 ##### Teste de Jarque-Bera
 > Verifica se os erros são um Ruído Branco, ou seja, seguem uma distribuição normal. O teste se baseia nos resíduos do método dos mínimos quadrados. Para sua realização o teste necessita dos cálculos da assimetria (skewness) e da curtose (kurtosis) da amostra, dado pela seguinte fórmula:
@@ -138,6 +138,16 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 
 - *H0: resíduos são normalmente distribuídos*
 - *H1: resíduos não são normalmente distribuídos*
+
+#### Resumo:
+
+|Teste|Quando usar|Prós|Contras|Cenários não indicados|
+|---|---|---|---|---|
+|Shapiro-Wilk|Pequenas amostras (sensível a pequenas desvios da normalidade)|Sensível a pequenas desvios da normalidade (adequado para amostras pequenas|Pode ser menos potente em amostras maiores|Dados com distribuição fortemente bimodal ou multimodal|
+|Kolmogorov-Smirov|Amostras grandes (teste não paramétrico)|Não requer suposições sobre os parâmetros da distribuição (adequado para amostras grandes)|Menos sensível a pequenos desvios (menos potente em amostras pequenas)|Sensível a desvios nas caudas da distribuição|
+|Anderson Darling|Verificação geral de normalidade|Sensibilidade a desvios em caudas e simetria (fornece estatística de teste e valores críticos)|Menos sensível a desvios pequenos|Não é recomendado para amostras muito pequenas|
+|Jaque-Bera|Verificação geral de normalidade em amostras grandes|Combina informações sobre simetria e curtose (adequado para amostras grandes)|Menos sensível a desvios pequenos|Sensível a desvios nas caudas da distribuição|
+  
   
 ##### Teste de Aderência
 > Este teste é utilizado quando deseja-se validar a hipótese que um conjunto de dados é gerado por uma determinada distribuição de probabilidade.
@@ -156,16 +166,96 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 
 - *H0: As subpopulações das variáveis aleatórias são homogêneas*
 - *H1: As subpopulações das variáveis aleatórias não são homogêneas*
+  
 
 #### Coeficientes de Correlação
+> O coeficiente de correlação verificar a existência de associação entre dois conjuntos de dados e também o seu grau desta associação.
 
 ##### Pearson 
-##### Spearman 
+> Estabelecer o nível da relação linear entre duas variáveis. Em outras palavras, mede em grau e sentido (crescente/decrescente) da associação linear entre duas variáveis. Sendo definido pela equação:
+
+![1](https://github.com/HenrySchall/Time-Series/assets/96027335/8f4dd7f6-e82b-4bf0-a06d-58400ede1060)
+
+> Deve-se lembrar que o coeficiente de correlação populacional é dado por:
+
+![2](https://github.com/HenrySchall/Time-Series/assets/96027335/6e39a2b7-4bfd-4d30-987e-bca3e8c5c8d8)
+
+![3](https://github.com/HenrySchall/Time-Series/assets/96027335/5391579e-90f0-4ed2-92a0-b95c6068591f)
+
+> O coeficiente de correlação de Pearson esta sempre entre −1,00 e +1,00, onde  o sinal indica a direção, se a correlação é positiva (direta) ou negativa (inversa). O valor do coeficiente de Pearson indica a força da correlação, onde nos  intervalos (+0,90; +1,00) ou (−1,00; −0,90) indica muito forte correlação linear, (+0,60; +0,90) ou (−0,90; −0,60) indica uma forte correlação linear, entre (+0,30; +0,60) ou (−0,60; −0,30) indica uma moderada correlação linear e entre (0,00; +0,30) ou (−0,30; 0,00) indica uma fraca correlação linear.
+> 
+> Exemplo: Uma amostra com 15 observações do tempo de entrega (em minutos) de pizza de uma Pizzaria Delivery  e a distância de entrega. Deseja se verificar se as variáveis são correlacionadas. O gráfico de dispersão das 
+variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma, utilizar-se-á o coeficiente de correlação de Pearson para checar ser as variáveis são correlacionadas. 
+
+|Tempo|Distância|
+|---|---|
+|40|688|
+|21|215|
+|14|255|
+|20|462|
+|24|448|
+|29|776|
+|15|200|
+|19|132|
+|10|36|
+|35|770|
+|18|140|
+|52|810|
+|19|450|
+|20|635|
+|11|150|
+
+![4](https://github.com/HenrySchall/Time-Series/assets/96027335/a224016f-5d0a-4b84-ac79-6b8f5dae6ae1)
+
+> Conclui-se que existe uma relação linear forte e positiva entre as variáveis. Todavia o coeficiente de correlação de Pearson é apenas uma estimativa do coeficiente de correlação populacional, pois é calculado com base em uma amostra aleatória de 𝑛 pares de dados. Sendo assim a amostra observada pode apresentar correlação, mas a população não, neste caso, tem-se um problema de inferência, pois r≠0 não é garantia de que 𝜌≠0. Para resolver esse problema, utiliza-se da estatística de teste T-student, definido pela equação abaixo, que verificar se realmente existe correlação linear entre as variáveis:
+
+![5](https://github.com/HenrySchall/Time-Series/assets/96027335/84310f44-b3d8-477d-9e71-1ec81dcbb21a)
+
+> Onde 𝑡 segue uma distribuição 𝑡−𝑆𝑡𝑢𝑑𝑒𝑛𝑡 com 𝑛−2 graus de liberdade e regido pelas seguintes hipóteses:
+
+- *H0: A correlação entre as variáveis é zero (𝜌 = 0)*
+- *H1: A correlação entre as variáveis não é zero (𝜌 ≠ 0)*
+
+![6](https://github.com/HenrySchall/Time-Series/assets/96027335/ccc5a428-cea3-4a8f-a773-c6b454b87f28)
+
+> A partir da estatística 𝑡 com 13 graus de liberdade, os pontos críticos ±2,1604. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Ou seja, a correlação entre o tempo de entrega e a distância percorrida é diferente de zero, então, existe uma relação linear e positiva da ordem de  𝑟 = 0,8216;
+
+##### Spearman
+> O coeficiente de correlação de Spearman, ou rho de Spearman, é uma medida não paramétrica da correlação (associação) entre duas variáveis ordinais. Ao contrário do coeficiente de correlação de Pearson, que mede a força e a direção da relação linear entre duas variáveis contínuas, o coeficiente de Spearman avalia intensidade (o quão bem) é a relação relação entre as duas variáveis. O coeficiente de correlação de Spearman (𝜌) é calculado utilizando a seguinte fórmula:
+
+![8](https://github.com/HenrySchall/Time-Series/assets/96027335/3c54cc79-4d8f-4db8-9d87-6eaecd96ec36)
+
+#### Interpretação:
+- ρ=1 indica uma perfeita correlação positiva.
+- ρ=−1 indica uma perfeita correlação negativa.
+- ρ=0 indica ausência de correlação.
+ 
+> Utilizando-se da mesma equação estatística de teste T-student do coeficiente de correlação de Pearson. Teremos as seguintes hipóteses:
+
+- *H0: A correlação entre as variáveis é zero*
+- *H1: A correlação entre as variáveis não é zero*
+
+> Exemplo: dados os valores da tabela abaixo:
+
+![9](https://github.com/HenrySchall/Time-Series/assets/96027335/68db17b8-2b31-41c9-b1d1-cf241b30ee55)
+
+![12](https://github.com/HenrySchall/Time-Series/assets/96027335/1c332788-5570-48e1-8d17-2b3b36c61aff)
+
+> Dado que 𝑡 ~ 𝑡𝑛−2;𝛼2 ⁄ , tem-se, a partir da estatística 𝑡−𝑆𝑡𝑢𝑑𝑒𝑛𝑡 com 11 graus 
+de liberdade, os pontos críticos ±2,2010. Portanto, rejeita-se 𝐻𝑜 ao nível de 
+significância de 5%. Ou seja, a correlação entre as variáveis 𝑋 e 𝑌 é diferente 
+de zero, então, existe uma relação não-linear e negativa da ordem de 𝑟=
+ −0,9698. 
+
 ##### Kendall 
+> O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinaiss, como no caso do coeficiente de correlação de Spearman. Ele é particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é calculado utilizando as seguintes fórmulas:
 
+![7](https://github.com/HenrySchall/Time-Series/assets/96027335/a9c81241-d071-40d6-aa6e-2c58ab8ca5ba)
 
-
-
+#### Interpretação:
+- τ=1 indica uma perfeita concordância.
+- τ=−1 indica uma perfeita discordância.
+- τ=0 indica ausência de associação entre as variáveis.
 
 
 
