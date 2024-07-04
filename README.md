@@ -123,6 +123,8 @@ Estatística de teste:
 - *H0: A amostra segue uma distribuição normal (W-obtido < W-crítico)*
 - *H1: A amostra não segue uma distribuição normal (W-obtido > W-crítico)*
 
+![Caderno sem título-3](https://github.com/HenrySchall/Time-Series/assets/96027335/b5ca7281-9797-4bef-80b1-4686e7360a4b)
+
 ##### Teste de Jarque-Bera
 > Verifica se os erros são um Ruído Branco, ou seja, seguem uma distribuição normal. O teste se baseia nos resíduos do método dos mínimos quadrados. Para sua realização o teste necessita dos cálculos da assimetria (skewness) e da curtose (kurtosis) da amostra, dado pela seguinte fórmula:
  
