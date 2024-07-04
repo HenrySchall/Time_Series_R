@@ -223,7 +223,7 @@ variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma,
 ##### Spearman
 > O coeficiente de correlação de Spearman, ou rho de Spearman, é uma medida não paramétrica da correlação (associação) entre duas variáveis ordinais. Ao contrário do coeficiente de correlação de Pearson, que mede a força e a direção da relação linear entre duas variáveis contínuas, o coeficiente de Spearman avalia intensidade (o quão bem) é a relação relação entre as duas variáveis. O coeficiente de correlação de Spearman (𝜌) é calculado utilizando a seguinte fórmula:
 
-![8](https://github.com/HenrySchall/Time-Series/assets/96027335/3c54cc79-4d8f-4db8-9d87-6eaecd96ec36)
+![20](https://github.com/HenrySchall/Time-Series/assets/96027335/65f56f8e-31b3-4d4f-a4d0-b7e692b2fd44)
 
 #### Interpretação:
 - ρ=1 indica uma perfeita correlação positiva.
@@ -250,14 +250,30 @@ de zero, então, existe uma relação não-linear e negativa da ordem de 𝑟=
 ##### Kendall 
 > O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinaiss, como no caso do coeficiente de correlação de Spearman. Ele é particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é calculado utilizando as seguintes fórmulas:
 
-![7](https://github.com/HenrySchall/Time-Series/assets/96027335/a9c81241-d071-40d6-aa6e-2c58ab8ca5ba)
+![19](https://github.com/HenrySchall/Time-Series/assets/96027335/1513a1ac-16d2-42e5-adc4-e905f544ae50)
 
 #### Interpretação:
 - τ=1 indica uma perfeita concordância.
 - τ=−1 indica uma perfeita discordância.
 - τ=0 indica ausência de associação entre as variáveis.
 
+Exemplo: Uma amostra com 13 observações de duas variáveis 𝑋 e 𝑌 foram 
+coletadas e deseja-se verificar se as variáveis são correlacionadas. O gráfico 
+de dispersão das variáveis, abaixo, sugere que há uma relação negativa, mas 
+não linear entreas variáveis. Desta forma, utilizar-se-á o coeficiente de 
+correlação de Kendall para checar ser as variáveis são correlacionadas.
 
+![14](https://github.com/HenrySchall/Time-Series/assets/96027335/a886a3c7-1e07-429f-844f-782e88c480c7)
+
+
+Dado que 𝑍 ~𝑁(0;1), tem-se, a partir da estatística 𝑁𝑜𝑟𝑚𝑎𝑙 𝑝𝑎𝑑𝑟ã𝑜, os pontos 
+críticos ±1,96. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Ou seja, 
+a correlação entre as variáveis 𝑋 e 𝑌 é diferente de zero, então, existe uma 
+relação não-linear e negativa da ordem de 𝜏=−0,7692.
+
+![17](https://github.com/HenrySchall/Time-Series/assets/96027335/aae35d85-d483-40ad-a41e-6261c2b36b97)
+
+![18](https://github.com/HenrySchall/Time-Series/assets/96027335/f5929019-95c3-4349-aaac-89aa6a6a9649)
 
 
 
