@@ -17,7 +17,7 @@ Série Temporal -> é um conjunto de observações ordenadas no tempo ou um cort
 - Sazonalidade (Szt): oscilações de subida e de queda que sempre ocorrem em um determinado período (maior valor da conta de energia elétrica no inverno).
 - Resíduos (et): apresenta movimentos ascendentes e descendentes da série após a retirada do efeito de tendência ou sazonal (sequência de variáveis aleatórias).
 
-![Sem título](https://github.com/HenrySchall/R/assets/96027335/b60d5d3f-0d12-4695-ac17-eb49a8e8b42a)
+![Figura-4-Decomposicao-da-serie-temporal-em-componentes-de-sazonalidade-de-tendencia-e](https://github.com/HenrySchall/Time-Series/assets/96027335/46bf2b49-dcb1-4153-9d66-2e57b4dc57ad)
 
 Processo Estocástico -> é uma coleção de variáveis aleatórias definidas num mesmo espaço de probabilidades (processo gerador de uma série de variáveis). A descrição de um 
 processo estocástico é feita através de uma distribuição de probabilidade conjunta (o que é muito complexo de se fazer), então geralmente descrevemos ele por meio das funções:
@@ -25,14 +25,14 @@ processo estocástico é feita através de uma distribuição de probabilidade c
 - 𝜎^2(𝑡)=𝑉𝑎𝑟{𝑍(𝑡)} -> Variância 
 - 𝛾(𝑡1,𝑡2)=𝐶𝑜𝑣{𝑍(𝑡1),𝑍(𝑡2)} -> Autocovariância
 
-![Captura de tela 2024-02-07 181930](https://github.com/HenrySchall/R/assets/96027335/7ea476dd-6ddf-4439-8aea-12fd6d06ab33)
+![Captura de tela 2024-07-04 180109](https://github.com/HenrySchall/Time-Series/assets/96027335/7ffc0399-4f35-4e82-ac69-8950c083c8f4)
 
 Estacionaridade -> é quando uma série temporal apresenta todas suas características estatísticas constante ao longo do tempo
 - Estacionaridade Fraca = é quando as propriedades estatiaticas, são constantes no tempo, E(x)=U, Var(x) = 𝜎^2, COV(X,X-n) = k (corariância entre observações em diferentes pontos no tempo depende do tempo específico em que elas ocorreram). Na literatura, geralmente estacionalidade significa estacionalidade fraca.
 
 - Estacionaridade Forte = também chamada de estrita, é quando a função de probabilidade conjunta é invariante no tempo, ou seja, as distribuições individuais são iguais para todos "ts". Com isso a covariância depende apenas da distância entre as observações e não do tempo especifico que ocorreram. 
 
-![IMG_1666](https://github.com/HenrySchall/R/assets/96027335/2e9ebb70-9d46-448a-ae0a-88f82e5c6f9e)
+![Imagem-2](https://github.com/HenrySchall/Time-Series/assets/96027335/6c237676-00e5-407f-bcc7-cddf6c1c4a34)
 
 Passeio Aleatório (Random Walk) -> é a soma de pequenas flutuações estocásticas (tendência estocástica)
 Matematicamente: 𝑍𝑡 = 𝑍(𝑡−1)+ et
