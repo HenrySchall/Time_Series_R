@@ -170,12 +170,14 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 #### Coeficientes de Correlação
 > Os coeficientes de correlação verificam a existência e o grau de associação entre dois conjuntos de dados.
 
-##### Pearson 
+##### Coeficiente Pearson 
 > Estabelecer o nível de relação linear entre duas variáveis. Em outras palavras, mede em grau e o sentido (crescente/decrescente) da associação linear entre duas variáveis. Ele sempre estará entre −1,00 e +1,00, tendo o sinal a função de indicar a direção do movimento, ou seja, positivo (relação direta) e negativa (relação inversa) e o valor do coeficiente, a função de indicar a força da correlação, onde nos intervalos:
 > - (+0,90; +1,00) ou (−1,00; −0,90) = correlação muito forte
 > - (+0,60; +0,90) ou (−0,90; −0,60) = correlação forte
 > - (+0,30; +0,60) ou (−0,60; −0,30) = correlação moderada
 > - (0,00; +0,30) ou (−0,30; 0,00) = correlação fraca
+>
+> Graficamente:
 
 ![3](https://github.com/HenrySchall/Time-Series/assets/96027335/5391579e-90f0-4ed2-92a0-b95c6068591f)
 
@@ -187,7 +189,7 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 
 ![2](https://github.com/HenrySchall/Time-Series/assets/96027335/6e39a2b7-4bfd-4d30-987e-bca3e8c5c8d8)
 
-> Exemplo: A tabela abaixo apresenta 15 observações, com o tempo de entrega (em minutos) e a distância de entrega de TelePizza.
+> Exemplo: A tabela abaixo apresenta 15 observações, com o tempo de entrega (em minutos) e a distância de entrega de um TelePizza.
 
 |Tempo|Distância|
 |---|---|
@@ -224,7 +226,7 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 
 > A partir da estatística 𝑡 com 13 graus de liberdade, os pontos críticos são ±2,1604. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre o tempo de entrega e a distância percorrida é diferente de zero, então, existe uma relação linear e positiva entre as variáveis da ordem de 𝑟 = 0,8216.
 
-##### Spearman
+##### Coeficiente Spearman
 > O coeficiente de correlação de Spearman, ou rho de Spearman, é uma medida não paramétrica da correlação (associação) entre duas variáveis ordinais. Ao contrário do coeficiente de correlação de Pearson, que mede a força e a direção da relação linear entre duas variáveis, o coeficiente de Spearman avalia a intensidade (o quão bem) é a relação entre duas variáveis. O coeficiente de correlação de Spearman (𝜌) é calculado utilizando a seguinte fórmula:
 
 ![20](https://github.com/HenrySchall/Time-Series/assets/96027335/65f56f8e-31b3-4d4f-a4d0-b7e692b2fd44)
@@ -234,7 +236,7 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 - ρ=−1 indica uma perfeita correlação negativa.
 - ρ=0 indica ausência de correlação.
 
-> Exemplo: dados os valores da tabela abaixo:
+> Exemplo: Dados os valores da tabela abaixo:
 
 ![9](https://github.com/HenrySchall/Time-Series/assets/96027335/68db17b8-2b31-41c9-b1d1-cf241b30ee55)
 
@@ -250,17 +252,28 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 > A partir da estatística 𝑡−𝑆𝑡𝑢𝑑𝑒𝑛𝑡 com 11 graus de liberdade, os pontos críticos são ±2,2010. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre as variáveis 𝑋 e 𝑌 é diferente 
 de zero, então, existe uma relação não-linear e negativa de ordem 𝑟= −0,9698. 
 
-##### Kendall 
-> O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinais, exatamente igual ao coeficiente de correlação de Spearman, a difenreça é que ele mede a correlação de concordância, enquanto Spearman, mede a correlação de postos. Sendo particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é calculado utilizando a seguinte fórmula:
+##### Coeficiente Kendall 
+> O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinais, exatamente igual ao coeficiente de correlação de Spearman, a difenreça é que ele mede a correlação de concordância, enquanto Spearman, mede a correlação de postos. Sendo particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é definido pela seguinte fórmula:
 
-![19](https://github.com/HenrySchall/Time-Series/assets/96027335/1513a1ac-16d2-42e5-adc4-e905f544ae50)
+![124](https://github.com/HenrySchall/Time-Series/assets/96027335/ac68ba9a-1c0d-4cab-a892-7d9ab87cc400)
+
+> No qual, 𝑛 é o número de elementos aos quais atribui-se postos, 𝑆 é a soma da variável 𝑌 à direita que são superiores menos o número de postos à direita que são inferiores.
 
 #### Interpretação:
 - τ=1 indica uma perfeita concordância.
 - τ=−1 indica uma perfeita discordância.
 - τ=0 indica ausência de associação entre as variáveis.
 
-> Exemplo: dados os valores da tabela abaixo:
+> Para o cálculo do coeficiente de correlação por postos de Kendall ordena-se inicialmente uma das variáveis em ordem crescente de postos e o S correspondente a cada elemento será obtido fazendo o número de elementos 
+cujo posto é superior ao que se está calculando menos o número de elementos cujo posto é inferior ao mesmo. Para verificar a significância do valor observado do coeficiente 𝜏 de Kendall, para 𝑛≤10 deve-se consultar a tabela abaixo.
+
+![125](https://github.com/HenrySchall/Time-Series/assets/96027335/9a2f16b5-e667-4d3c-a8dd-01d3ed678409)
+
+> Para 𝑛>10, pode utilizar a estatística de teste:
+
+![128](https://github.com/HenrySchall/Time-Series/assets/96027335/275d3eda-ef7e-453a-86d1-a4918ef935ff)
+
+> Exemplo: Dados os valores da tabela abaixo:
 
 ![14](https://github.com/HenrySchall/Time-Series/assets/96027335/a886a3c7-1e07-429f-844f-782e88c480c7)
 
@@ -268,12 +281,17 @@ de zero, então, existe uma relação não-linear e negativa de ordem 𝑟= −0
 
 ![17](https://github.com/HenrySchall/Time-Series/assets/96027335/aae35d85-d483-40ad-a41e-6261c2b36b97)
 
+> Tendo as seguintes hipóteses:
+
+- *H0: A correlação entre as variáveis é zero (𝜏=0)*
+- *H1: A correlação entre as variáveis não é zero (𝜏≠0)*
+
 >  A partir da estatística 𝑁𝑜𝑟𝑚𝑎𝑙 𝑝𝑎𝑑𝑟ã𝑜, os pontos críticos são ±1,96. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre as variáveis 𝑋 e 𝑌 é diferente de zero, então, existe uma 
 relação não-linear e negativa de ordem 𝜏=−0,7692.
 
+*Observação: Pode-se fazer uma comparação entre coeficiente de correlação de Spearman e o coeficiente de correlação por postos de Kendall. Os valores numéricos não são iguais, quando calculados para os mesmos pares de postos, e não são comparáveis numericamente. Contudo, pelo fato de utilizarem a mesma quantidade de informação contida nos dados, ambos têm o mesmo poder de detectar a existência de associação na população, e rejeitarão a hipótese nula para um mesmo nível de significância.*
 
 
-![18](https://github.com/HenrySchall/Time-Series/assets/96027335/f5929019-95c3-4349-aaac-89aa6a6a9649)
 
 
 
