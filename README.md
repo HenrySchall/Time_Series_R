@@ -146,8 +146,7 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
 |Shapiro-Wilk|Pequenas amostras (sensível a pequenas desvios da normalidade)|Sensível a pequenas desvios da normalidade (adequado para amostras pequenas|Pode ser menos potente em amostras maiores|Dados com distribuição fortemente bimodal ou multimodal|
 |Kolmogorov-Smirov|Amostras grandes (teste não paramétrico)|Não requer suposições sobre os parâmetros da distribuição (adequado para amostras grandes)|Menos sensível a pequenos desvios (menos potente em amostras pequenas)|Sensível a desvios nas caudas da distribuição|
 |Anderson Darling|Verificação geral de normalidade|Sensibilidade a desvios em caudas e simetria (fornece estatística de teste e valores críticos)|Menos sensível a desvios pequenos|Não é recomendado para amostras muito pequenas|
-|Jaque-Bera|Verificação geral de normalidade em amostras grandes|Combina informações sobre simetria e curtose (adequado para amostras grandes)|Menos sensível a desvios pequenos|Sensível a desvios nas caudas da distribuição|
-  
+|Jaque-Bera|Verificação geral de normalidade em amostras grandes|Combina informações sobre simetria e curtose (adequado para amostras grandes)|Menos sensível a desvios pequenos|Sensível a desvios nas caudas da distribuição| 
   
 ##### Teste de Aderência
 > Este teste é utilizado quando deseja-se validar a hipótese que um conjunto de dados é gerado por uma determinada distribuição de probabilidade.
@@ -169,23 +168,26 @@ $\widehat{u3}$ e $\widehat{u4}$ são as estimativas do terceiro e quarto momento
   
 
 #### Coeficientes de Correlação
-> O coeficiente de correlação verificar a existência de associação entre dois conjuntos de dados e também o seu grau desta associação.
+> Os coeficientes de correlação verificam a existência e o grau de associação entre dois conjuntos de dados.
 
 ##### Pearson 
-> Estabelecer o nível da relação linear entre duas variáveis. Em outras palavras, mede em grau e sentido (crescente/decrescente) da associação linear entre duas variáveis. Sendo definido pela equação:
-
-![1](https://github.com/HenrySchall/Time-Series/assets/96027335/8f4dd7f6-e82b-4bf0-a06d-58400ede1060)
-
-> Deve-se lembrar que o coeficiente de correlação populacional é dado por:
-
-![2](https://github.com/HenrySchall/Time-Series/assets/96027335/6e39a2b7-4bfd-4d30-987e-bca3e8c5c8d8)
+> Estabelecer o nível de relação linear entre duas variáveis. Em outras palavras, mede em grau e o sentido (crescente/decrescente) da associação linear entre duas variáveis. Ele sempre estará entre −1,00 e +1,00, tendo o sinal a função de indicar a direção do movimento, ou seja, positivo (relação direta) e negativa (relação inversa) e o valor do coeficiente, a função de indicar a força da correlação, onde nos intervalos:
+> - (+0,90; +1,00) ou (−1,00; −0,90) = correlação muito forte
+> - (+0,60; +0,90) ou (−0,90; −0,60) = correlação forte
+> - (+0,30; +0,60) ou (−0,60; −0,30) = correlação moderada
+> - (0,00; +0,30) ou (−0,30; 0,00) = correlação fraca
 
 ![3](https://github.com/HenrySchall/Time-Series/assets/96027335/5391579e-90f0-4ed2-92a0-b95c6068591f)
 
-> O coeficiente de correlação de Pearson esta sempre entre −1,00 e +1,00, onde  o sinal indica a direção, se a correlação é positiva (direta) ou negativa (inversa). O valor do coeficiente de Pearson indica a força da correlação, onde nos  intervalos (+0,90; +1,00) ou (−1,00; −0,90) indica muito forte correlação linear, (+0,60; +0,90) ou (−0,90; −0,60) indica uma forte correlação linear, entre (+0,30; +0,60) ou (−0,60; −0,30) indica uma moderada correlação linear e entre (0,00; +0,30) ou (−0,30; 0,00) indica uma fraca correlação linear.
-> 
-> Exemplo: Uma amostra com 15 observações do tempo de entrega (em minutos) de pizza de uma Pizzaria Delivery  e a distância de entrega. Deseja se verificar se as variáveis são correlacionadas. O gráfico de dispersão das 
-variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma, utilizar-se-á o coeficiente de correlação de Pearson para checar ser as variáveis são correlacionadas. 
+> Sua equação é definida pela seguinte fórmula:
+
+![1](https://github.com/HenrySchall/Time-Series/assets/96027335/8f4dd7f6-e82b-4bf0-a06d-58400ede1060)
+
+> Lembrando que o coeficiente de correlação populacional é dado por:
+
+![2](https://github.com/HenrySchall/Time-Series/assets/96027335/6e39a2b7-4bfd-4d30-987e-bca3e8c5c8d8)
+
+> Exemplo: A tabela abaixo apresenta 15 observações, com o tempo de entrega (em minutos) e a distância de entrega de TelePizza.
 
 |Tempo|Distância|
 |---|---|
@@ -205,9 +207,11 @@ variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma,
 |20|635|
 |11|150|
 
+> Calculando os valores obtemos o seguinte resultado:
+
 ![4](https://github.com/HenrySchall/Time-Series/assets/96027335/a224016f-5d0a-4b84-ac79-6b8f5dae6ae1)
 
-> Conclui-se que existe uma relação linear forte e positiva entre as variáveis. Todavia o coeficiente de correlação de Pearson é apenas uma estimativa do coeficiente de correlação populacional, pois é calculado com base em uma amostra aleatória de 𝑛 pares de dados. Sendo assim a amostra observada pode apresentar correlação, mas a população não, neste caso, tem-se um problema de inferência, pois r≠0 não é garantia de que 𝜌≠0. Para resolver esse problema, utiliza-se da estatística de teste T-student, definido pela equação abaixo, que verificar se realmente existe correlação linear entre as variáveis:
+> Conclui-se que existe uma relação linear forte e positiva entre as variáveis. Todavia o coeficiente de correlação de Pearson é apenas uma estimativa do coeficiente de correlação populacional, pois é calculado com base em uma amostra aleatória de 𝑛 pares de dados. Sendo assim a amostra observada pode apresentar correlação, mas a população não, neste caso, tem-se um problema de inferência, pois o fato de r≠0 não é garantia de 𝜌≠0. Para resolver esse problema, utiliza-se da estatística de teste T-student, definido pela equação abaixo, para verificar se realmente existe correlação linear entre as variáveis:
 
 ![5](https://github.com/HenrySchall/Time-Series/assets/96027335/84310f44-b3d8-477d-9e71-1ec81dcbb21a)
 
@@ -218,10 +222,10 @@ variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma,
 
 ![6](https://github.com/HenrySchall/Time-Series/assets/96027335/ccc5a428-cea3-4a8f-a773-c6b454b87f28)
 
-> A partir da estatística 𝑡 com 13 graus de liberdade, os pontos críticos ±2,1604. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Ou seja, a correlação entre o tempo de entrega e a distância percorrida é diferente de zero, então, existe uma relação linear e positiva da ordem de  𝑟 = 0,8216;
+> A partir da estatística 𝑡 com 13 graus de liberdade, os pontos críticos são ±2,1604. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre o tempo de entrega e a distância percorrida é diferente de zero, então, existe uma relação linear e positiva entre as variáveis da ordem de 𝑟 = 0,8216.
 
 ##### Spearman
-> O coeficiente de correlação de Spearman, ou rho de Spearman, é uma medida não paramétrica da correlação (associação) entre duas variáveis ordinais. Ao contrário do coeficiente de correlação de Pearson, que mede a força e a direção da relação linear entre duas variáveis contínuas, o coeficiente de Spearman avalia intensidade (o quão bem) é a relação relação entre as duas variáveis. O coeficiente de correlação de Spearman (𝜌) é calculado utilizando a seguinte fórmula:
+> O coeficiente de correlação de Spearman, ou rho de Spearman, é uma medida não paramétrica da correlação (associação) entre duas variáveis ordinais. Ao contrário do coeficiente de correlação de Pearson, que mede a força e a direção da relação linear entre duas variáveis, o coeficiente de Spearman avalia a intensidade (o quão bem) é a relação entre duas variáveis. O coeficiente de correlação de Spearman (𝜌) é calculado utilizando a seguinte fórmula:
 
 ![20](https://github.com/HenrySchall/Time-Series/assets/96027335/65f56f8e-31b3-4d4f-a4d0-b7e692b2fd44)
 
@@ -229,26 +233,25 @@ variáveis, abaixo, sugere que há uma relação positiva e linear. Desta forma,
 - ρ=1 indica uma perfeita correlação positiva.
 - ρ=−1 indica uma perfeita correlação negativa.
 - ρ=0 indica ausência de correlação.
- 
-> Utilizando-se da mesma equação estatística de teste T-student do coeficiente de correlação de Pearson. Teremos as seguintes hipóteses:
-
-- *H0: A correlação entre as variáveis é zero*
-- *H1: A correlação entre as variáveis não é zero*
 
 > Exemplo: dados os valores da tabela abaixo:
 
 ![9](https://github.com/HenrySchall/Time-Series/assets/96027335/68db17b8-2b31-41c9-b1d1-cf241b30ee55)
 
-![12](https://github.com/HenrySchall/Time-Series/assets/96027335/1c332788-5570-48e1-8d17-2b3b36c61aff)
+> Calculando os valores obtemos o seguinte resultado:
 
-> Dado que 𝑡 ~ 𝑡𝑛−2;𝛼2 ⁄ , tem-se, a partir da estatística 𝑡−𝑆𝑡𝑢𝑑𝑒𝑛𝑡 com 11 graus 
-de liberdade, os pontos críticos ±2,2010. Portanto, rejeita-se 𝐻𝑜 ao nível de 
-significância de 5%. Ou seja, a correlação entre as variáveis 𝑋 e 𝑌 é diferente 
-de zero, então, existe uma relação não-linear e negativa da ordem de 𝑟=
- −0,9698. 
+![12](https://github.com/HenrySchall/Time-Series/assets/96027335/1c332788-5570-48e1-8d17-2b3b36c61aff)
+ 
+> Utilizando-se da mesma equação estatística do teste T-student. Teremos as seguintes hipóteses:
+
+- *H0: A correlação entre as variáveis é zero*
+- *H1: A correlação entre as variáveis não é zero*
+
+> A partir da estatística 𝑡−𝑆𝑡𝑢𝑑𝑒𝑛𝑡 com 11 graus de liberdade, os pontos críticos são ±2,2010. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre as variáveis 𝑋 e 𝑌 é diferente 
+de zero, então, existe uma relação não-linear e negativa de ordem 𝑟= −0,9698. 
 
 ##### Kendall 
-> O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinaiss, como no caso do coeficiente de correlação de Spearman. Ele é particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é calculado utilizando as seguintes fórmulas:
+> O coeficiente de correlação de Kendall é uma medida estatística utilizada para avaliar a associação entre duas variáveis ordinais, exatamente igual ao coeficiente de correlação de Spearman, a difenreça é que ele mede a correlação de concordância, enquanto Spearman, mede a correlação de postos. Sendo particularmente útil quando as variáveis em questão não assumem necessariamente distribuições normais. O coeficiente de correlação de Kendall (τ) é calculado utilizando a seguinte fórmula:
 
 ![19](https://github.com/HenrySchall/Time-Series/assets/96027335/1513a1ac-16d2-42e5-adc4-e905f544ae50)
 
@@ -257,23 +260,21 @@ de zero, então, existe uma relação não-linear e negativa da ordem de 𝑟=
 - τ=−1 indica uma perfeita discordância.
 - τ=0 indica ausência de associação entre as variáveis.
 
-Exemplo: Uma amostra com 13 observações de duas variáveis 𝑋 e 𝑌 foram 
-coletadas e deseja-se verificar se as variáveis são correlacionadas. O gráfico 
-de dispersão das variáveis, abaixo, sugere que há uma relação negativa, mas 
-não linear entreas variáveis. Desta forma, utilizar-se-á o coeficiente de 
-correlação de Kendall para checar ser as variáveis são correlacionadas.
+> Exemplo: dados os valores da tabela abaixo:
 
 ![14](https://github.com/HenrySchall/Time-Series/assets/96027335/a886a3c7-1e07-429f-844f-782e88c480c7)
 
-
-Dado que 𝑍 ~𝑁(0;1), tem-se, a partir da estatística 𝑁𝑜𝑟𝑚𝑎𝑙 𝑝𝑎𝑑𝑟ã𝑜, os pontos 
-críticos ±1,96. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Ou seja, 
-a correlação entre as variáveis 𝑋 e 𝑌 é diferente de zero, então, existe uma 
-relação não-linear e negativa da ordem de 𝜏=−0,7692.
+> Calculando os valores obtemos o seguinte resultado:
 
 ![17](https://github.com/HenrySchall/Time-Series/assets/96027335/aae35d85-d483-40ad-a41e-6261c2b36b97)
 
+>  A partir da estatística 𝑁𝑜𝑟𝑚𝑎𝑙 𝑝𝑎𝑑𝑟ã𝑜, os pontos críticos são ±1,96. Portanto, rejeita-se 𝐻𝑜 ao nível de significância de 5%. Sendo assim a correlação entre as variáveis 𝑋 e 𝑌 é diferente de zero, então, existe uma 
+relação não-linear e negativa de ordem 𝜏=−0,7692.
+
+
+
 ![18](https://github.com/HenrySchall/Time-Series/assets/96027335/f5929019-95c3-4349-aaac-89aa6a6a9649)
+
 
 
 
