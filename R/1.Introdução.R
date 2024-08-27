@@ -45,21 +45,21 @@ plot(s2)
 
 ### Testes de Normalidade ###
 
-#  - H0: resíduos normalmente distribuídos (p > 0.05)
-#  - H1: resíduos não são normalmente distribuídos (p <= 0.05)
+# - H0: resíduos normalmente distribuídos (p > 0.05)
+# - H1: resíduos não são normalmente distribuídos (p <= 0.05)
 shapiro.test(serie1)
 jarque.bera.test(serie1)
 
 ### Testes de Estacionaridade ###
 
 # Teste KPSS (Kwiatkowski-Phillips-Schmidt-Shin)
-#  - H0 = é estacionária: teste estatístico < valor crítico
-#  - H1 = não é estacionária: teste estatístico >= valor crítico
+# - H0 = é estacionária: teste estatístico < valor crítico
+# - H1 = não é estacionária: teste estatístico >= valor crítico
 ur.kpss(serie1)
 
 # Teste pp (Philips-Perron)
-#   - H0 = é estacionária: p > 0.05
-#   - H1 = não é estacionária: p <= 0.05
+#  - H0 = é estacionária: p > 0.05
+#  - H1 = não é estacionária: p <= 0.05
 pp <- ur.pp(serie1)
 summary(pp)
 
