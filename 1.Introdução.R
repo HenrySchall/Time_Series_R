@@ -21,6 +21,18 @@ plot(serie1)
 #shapiro.test(serie1)
 #jarque.bera.test(serie1)
 
+######################
+### Autocorrelação ###
+######################
+
+set.seed(123)
+
+# Plotar a FAC
+acf(dados1, main="Função de Autocorrelação (FAC)")
+
+# Plotar a FACP
+pacf(dados1, main="Função de Autocorrelação Parcial (FACP)")
+
 #########################
 ### Passeio Aleatório ###
 #########################
